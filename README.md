@@ -5,8 +5,8 @@
  jadi dalam pemrosesan program nya tidak dapat multiple eksekusi atau secara 1 waktu mengeksekusi lebih dari 1 program
  misal nya jika kita gambarkan dalam kehidupan sehari2 adalah, ketika ktia mandi setelah itu makan
  tentunya kita nga mungkin dong kita makan sambil mandi...awowaowaoawoaw...ya kali mau nasinya rasa sabun dan sampo :v, 
-    nah pasti proses tersebut akan di lakukan secara satu per satu atau dalam istilah programming adalah Concurrency programming, 
-    Sincronus, atau Blocking.
+ nah pasti proses tersebut akan di lakukan secara satu per satu atau dalam istilah programming adalah Concurrency programming, 
+ Sincronus, atau Blocking.
 
 # Parallel
 
@@ -28,12 +28,13 @@
 # Membuat Thread secara manual
 
  Thread merupakan proses ringan, membuat Thread bukan berarti kita melakukan pekerjan.
- Untuk mmebuat Pekerjaan dalam Thread, kita perlu membaut onbject dari interface Runnable, selanjutnya object Runnable tersebuat kita jadikan parameter saat kita meng inisialisasi Object Thread nya
+ Untuk mmebuat Pekerjaan dalam Thread, kita perlu membaut onbject dari interface Runnable, selanjutnya object Runnable tersebut kita jadikan parameter saat kita meng inisialisasi Object Thread nya
  Saat Thread berjalan, Thread akan berjalan secara ascyncronus, artinya dia akan berjalan sendiri dan kode program kita akan berlanjut ke kode program selanjutnya
  Untuk menjalankan Thread kita harus menanggil method yang bernama start();
  Example ada pada unit test package com.threed; line 30 dengan nama method testCreateThread()
 
 # Thread Sleep
+
  Pada proses development, kadang kita memerlukan simulasi proses yang berjalan dalam waktu tertentu
  Untuk melakukan hal ini kita bisa memanfaatkan fitur Thread.sleep(timeMilis); yang terdapat pada Java programing langguage.
  Dengan menggunakan Thread.sleep(timeMilis); kita bisa membuat thread tertidur dan berhenti dalam waktu yang kita tentukan
@@ -49,6 +50,7 @@
  Example ada pada unit test package com.thread; line ke 71 dengan nama method testThreadJoin()
 
 # Thread Interrupt
+
  Interrupted merupakan mengirim sinyal ke thread bahwa thread tersebut harus berhenti melakukan pekerjaanya
  Untuk melakukan Interrupt, kita bisa menggunkan method inturept(); pada thread
  Saat kita memanggil method intrrupt();, secara otomatid Thread.interupted() akan bernilai true
@@ -57,12 +59,14 @@
  Example ada pada unit test package com.thread; line 93 -128 dengan nama method testInterrupt() dan  testInterruptReal()
 
 # Thread Name
+
  Secara Default Thread di java memiliki nama, 
  Thread name secara default akan menggunkan nama Thread-{counter}
  Namun kita bisa juga mengubahnya dengan menggunkan method setName(name), dab getName() untuk mendapatkan thread name nya
  Example adapa pada unit test package com.thread; line 158 dengan nama method tesThreadSetName()
 
 # Thread state
+
  Thread state yaitu informasi dari state pada thread
  State digunakan jika kita ingin melihat atau mendapatkan informasi pada thread yang kita inignkan
  State akan berubah setatus nya sesuai dengan apa yang terjadi di thread
@@ -70,6 +74,7 @@
  Example ada pada unit test package com.thread; line 174 dengan nama method testThreadState()
 
 # Thread Deamond
+
  secara default, saat kita membuat thread,thread tersebut disebut sebagai user thread
  untuk program java (bukan program java unit test/JUNIT) secara defaut akan menunggu semua user thread selesai 
  sebelum program di berhentikan.
