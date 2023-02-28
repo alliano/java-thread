@@ -12,7 +12,7 @@
 
  Paraallel adalah proses eksekusi banyak program dalam 1 waktu.
  ini kebalikanya dari Concurrency
- misal kita gambarkan dalam kehidupan nyata adalah, ketika kita main mobilejen dan maki-maki musuh kita.....ya kali pas main ML/mobile legend nga maki-maki ..nga enak jirr...kurang greged minimal harus keluarin kata-kata "Ahh...anjig, goblog..., Ahh Pantek, anjig, Dalampuki eeeee..." dan maka dari itu saya nobadkan gem ML/mobilegend jangan di mainkan saat bulan puasa nanti ya gaes heheh
+ misal kita gambarkan dalam kehidupan nyata adalah, ketika kita main mobilejen dan maki-maki musuh kita.....ya kali pas main ML/mobile legend nga maki-maki ..nga enak jirr...kurang greged minimal harus keluarin kata-kata "Ahh...anjig goblog..., Ahh Pantek, anjig, Dalampuki eeeee..." dan maka dari itu saya nobadkan gem ML/mobilegend jangan di mainkan saat bulan puasa nanti ya gaes heheh
 
 # Thread
 
@@ -31,7 +31,18 @@
  Untuk mmebuat Pekerjaan dalam Thread, kita perlu membaut onbject dari interface Runnable, selanjutnya object Runnable tersebut kita jadikan parameter saat kita meng inisialisasi Object Thread nya
  Saat Thread berjalan, Thread akan berjalan secara ascyncronus, artinya dia akan berjalan sendiri dan kode program kita akan berlanjut ke kode program selanjutnya
  Untuk menjalankan Thread kita harus menanggil method yang bernama start();
- Example ada pada unit test package com.threed; line 30 dengan nama method testCreateThread()
+ Example :
+ ``` java
+	@Test
+	public void testCreateThread() {
+		Runnable runnable = () -> {
+			System.out.println("Ini thread yang ke : "+ Thread.currentThread().getName());
+		};
+
+		Thread thread = new Thread(runnable);
+		thread.start();
+	}
+ ```
 
 # Thread Sleep
 
@@ -39,7 +50,32 @@
  Untuk melakukan hal ini kita bisa memanfaatkan fitur Thread.sleep(timeMilis); yang terdapat pada Java programing langguage.
  Dengan menggunakan Thread.sleep(timeMilis); kita bisa membuat thread tertidur dan berhenti dalam waktu yang kita tentukan
  Untuk melakukan hal ini, kita bisa memanggil static method sleep(); di class Thread, Maka secara otomatis Thread saat itu akan tertidur atau berhenti berproses sementara sesuai waktu yang telah kita berikan pada peremeter method sleep();
- Namun perlu diperhatikan, Method sleep bisa menyebabkan error InterruptedException Example ada pada unit test package com.threed; line 30 dengan nama method testThreadSleep(); Line 45
+ Namun perlu diperhatikan, Method sleep bisa menyebabkan error InterruptedException
+ Example :
+ ``` java 
+ 	@Test
+	public void testThreadSleep() {
+		Runnable runnable = () -> {
+			try{
+				Thread.sleep(1000);
+				System.out.println("Ini thread dengan nama : "+ Thread.currentThread().getName());
+			}catch(InterruptedException ITX){
+				ITX.printStackTrace();
+			}
+		};
+
+		Thread thread = new Thread(runnable);
+		thread.start();
+		// ini ktia sleep thread nya selama 2 detik agar aksi print out yang ada pada Runnabel dapat ditampilkan
+		// menga apa saya lakukan seperti ini ? karna program ini itu berjalanya secara asynycronus 
+		try{
+			Thread.sleep(2000);
+		}catch(InterruptedException ITX){
+			ITX.printStackTrace();
+		}
+		System.out.println("selesai");
+	}
+ ```
 
 # Thread Join
 
@@ -47,7 +83,31 @@
  Di cara yang sebelum nya kita menggunakan Thread.sleep(TimeMilis); untuk mengatasinya, sebenarnya cara tersebut 
  tidak baik karna pada Real nya nanti kita tidak tau berapa lama thread akan berjalan meng eksekusi program yang kita buat
  Untuk mengatasi permasalah tersebut kita bisa menggunakan Thread.join();
- Example ada pada unit test package com.thread; line ke 71 dengan nama method testThreadJoin()
+ Example :
+ ``` java
+ 	@Test
+	public void testThreadJoin() {
+
+		Runnable runnable = () -> {
+			try{
+				Thread.sleep(1000);
+				System.out.println("Sekarang Sedang menggunakan thread : "+Thread.currentThread().getName());
+			}catch(InterruptedException ITX) {
+				ITX.printStackTrace();
+			}
+		};
+		Thread thread = new Thread(runnable);
+		thread.start();
+		try {
+			//setelah Thread di start maka kode eksekusi program ini akan di block oleh thread.join(); untuk menngunggy eksekusi program yang ada pada Runnable selesai
+			thread.join();
+			System.out.println("Selesai");
+		}catch(InterruptedException ITX) {
+			ITX.printStackTrace();
+		}
+	}
+
+ ```
 
 # Thread Interrupt
 
@@ -56,14 +116,96 @@
  Saat kita memanggil method intrrupt();, secara otomatid Thread.interupted() akan bernilai true
  Saat kita membuat interrupt();, pada kode Runnable kita harus mengecek Interupted() tersebut, jika nga ngecek 
  maka interrupt kita nga ada gunanya
- Example ada pada unit test package com.thread; line 93 -128 dengan nama method testInterrupt() dan  testInterruptReal()
+ Example :
+ ``` java
+ 	@Test
+	public void testInterrupt() {
+		Runnable runnable = () -> {
+			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
+			for(var i = 0; i < 10; i++) {
+				System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
+				// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
+				try{
+					Thread.sleep(1000);
+				}catch(InterruptedException ITX) {
+					return;
+				}
+			}
+		};
+
+		Thread thread = new Thread(runnable);
+		thread.start();
+		// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
+		try {
+			Thread.sleep(2000);
+			// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
+			thread.interrupt();
+			System.out.println("Proses Eksekusi pada Runnable Selesai");
+			thread.join();
+			System.out.println("Program Selesai");
+		}catch(InterruptedException ITX) {
+			ITX.printStackTrace();
+		}
+	}
+ ```
+
+ ``` java
+/**
+	 * dalam real projek nanti kita akan menggunakan cara seperti ini karna untuk proses 
+	 * thread yang membutuhkan waktu itu nga di lakukan secara manual seperti kita menggunakan Thread.sleep() dalam Object Runnable dalam real case nya.
+	 */
+	@Test
+	public void testInterruptReal() {
+		Runnable runnable = () -> {
+			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
+			for(var i = 0; i < 10; i++) {
+				System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
+				// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
+				if(Thread.interrupted()){
+					return;
+				}
+			}
+		};
+
+		Thread thread = new Thread(runnable);
+		thread.start();
+		// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
+		try {
+			Thread.sleep(2000);
+			// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
+			thread.interrupt();
+			System.out.println("Proses Eksekusi pada Runnable Selesai");
+			thread.join();
+			System.out.println("Program Selesai");
+		}catch(InterruptedException ITX) {
+			ITX.printStackTrace();
+		}
+	}
+
+ ```
 
 # Thread Name
 
  Secara Default Thread di java memiliki nama, 
  Thread name secara default akan menggunkan nama Thread-{counter}
  Namun kita bisa juga mengubahnya dengan menggunkan method setName(name), dab getName() untuk mendapatkan thread name nya
- Example adapa pada unit test package com.thread; line 158 dengan nama method tesThreadSetName()
+ Example :
+ ``` java
+ 	@Test
+	public void tesThreadSetName() {
+		Thread thread = new Thread(() -> {
+			System.out.println("sedang jalan pada thread : "+Thread.currentThread().getName());
+		});
+		thread.setName("Fetching_Thirdparti_Api");
+		thread.start();
+		
+
+		//atau kita juga bisa langsung meng set name nya pada constructor saat kita meng inisialisasi object Thread nya
+		Thread thread2 = new Thread(() -> {
+			System.out.println("sedang menjalakan thread dengan nama : "+Thread.currentThread().getName()); }, "Fetching_Payment");
+			thread2.start();
+	}
+ ```
 
 # Thread state
 
@@ -71,7 +213,28 @@
  State digunakan jika kita ingin melihat atau mendapatkan informasi pada thread yang kita inignkan
  State akan berubah setatus nya sesuai dengan apa yang terjadi di thread
  untuk menggunkan data state kita bisa menggunakan method getState() dan akan mengembalikan informasi dengan tipe data enum
- Example ada pada unit test package com.thread; line 174 dengan nama method testThreadState()
+ Example :
+ ``` java
+    @Test
+ 	public void testThreadState() {
+
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println(Thread.currentThread().getState());
+				System.out.println("test thread "+Thread.currentThread().getName());
+			} }, "thread_state");
+			try{
+				System.out.println(thread.getState());
+				thread.start();
+				thread.join();
+				System.out.println(thread.getState());
+			}catch(InterruptedException ITX){
+				ITX.printStackTrace();
+			}
+	}
+
+ ```
 
 # Thread Deamond
 
@@ -82,4 +245,35 @@
  tersebut akan menjadi deamon thread
  Deamon thread tidak akan di tunggu jika memang program java akan berhenti
  Namun jika kita menghetikan program java dengan System.exit() maka semua user thread pun akan berhenti.
- Example ada pada java main package com.thread; class DaemonThread
+ Example :
+ ``` java
+ import java.lang.InterruptedException;
+
+public class DaemonThread {
+
+    public static void main(String... args){
+
+        // ini bisa di sebut user thread 
+        Thread thread = new Thread(() -> {
+            System.out.println("jalan pada thread "+Thread.currentThread().getName());
+            }, "user_thread");
+        thread.start();
+
+        // ini busa disebut deamon thread karna bisa dibilang thread ini akan berjalan di bacground
+        // daemon thread bisa kita gunakan sebagai job tertentu yang mana job tersebut tidak terlalu di perdulikan
+        // misal nya aja seperti proses export data ke file csv 
+
+        Thread daemonThread = new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+            }catch(InterruptedException ITX) {
+                ITX.printStackTrace();
+            }
+        }, "deamon_thread");
+        // ini akan mngubah thread ini menjadi deamon thread yang mana proses eksekusi tread ini berada pada bacground dari app kita
+        daemonThread.setDaemon(true);
+        daemonThread.start();
+    }
+}
+
+ ```
