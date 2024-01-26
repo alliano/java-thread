@@ -277,3 +277,47 @@ public class DaemonThread {
 }
 
  ```
+# Race Condition
+Trouble yang sering dijumpai saat kita menggunakan paralel programming atau asyncronus programming adalah race condition. ***Race condition*** ini merupakan sutu kejadian yang mana beberapa thread melakukan update pada 1 data secara bersamaan.
+
+``` java
+@AllArgsConstructor @NoArgsConstructor
+@Setter @Getter
+public class Counter {
+
+    private Long increment = 0L;
+
+    public void increment() {
+        this.increment++;
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void testRaceConditon(){
+	Counter counter = new Counter();
+	Runnable runnable = () -> {
+		for (int i = 0; i < 1000; i++) {
+			counter.increment();
+		}
+	};
+	
+	Thread thread1 = new Thread(runnable);
+	Thread thread2 = new Thread(runnable);
+	Thread thread3 = new Thread(runnable);
+	// beberapa thread melakukan update pada data counter secara bersamaan
+	thread1.start();
+	thread2.start();
+	thread3.start();
+
+	thread1.join();
+	thread2.join();
+	thread3.join();
+
+	// seharusnya jumlah dari incremnt nya 3000 tapi karena terjadi race condition hasilnya tidak sesuai
+	System.out.println(counter.getIncrement());
+}
+```
+
+# 
