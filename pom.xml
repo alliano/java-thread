@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.2</version>
+		<version>3.2.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.threed</groupId>
@@ -14,8 +14,8 @@
 	<name>java-threed</name>
 	<description>Demo project for java threed</description>
 	<properties>
-		<java.version>18</java.version>
-		<java.compiler>18</java.compiler>
+		<java.version>21</java.version>
+		<java.compiler>21</java.compiler>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -24,6 +24,11 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<!-- <dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<scope>test</scope>
+		</dependency> -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
