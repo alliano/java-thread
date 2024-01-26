@@ -1,6 +1,11 @@
 package com.threed;
 
 import org.junit.jupiter.api.Test;
+
+import com.threed.helper.Counter;
+
+import lombok.SneakyThrows;
+
 // import org.springframework.boot.test.context.SpringBootTest;
 import java.lang.InterruptedException;
 
@@ -11,25 +16,25 @@ class SpringJavaThreadApplication {
 	void contextLoads() {
 	}
 
-	/**
-	 * kode ini merepresentasikan Theread yang sedang di gunakan saat ini
-	 */
-	@Test
-	public void testCurrentThreed() {
+    /**
+     * kode ini merepresentasikan Theread yang sedang di gunakan saat ini
+     */
+    @Test
+    void currentThreed() {
 		String name = Thread.currentThread().getName();
 		System.out.println("Threed saat ini yang di gunakan adalah "+name);
 	}
 
-	/*
-	 * Cara membuat kita bisa buat Runnable terlebih dahulu
-	 * Runnable adalah sebuah interface yang kita bisa gunakan untuk membuat proses Thread
-	 * Setelah membuat Runnable kita bisa Membuat Thread dan diikuti deggan Runnable yang telah ktia buat
-	 * sebelumnya
-	 * setelah kita buat Thread nya, untuk menjalankan Thread nya ktia harus memanggil method yang bernama start();
-	 * dan prohram therad yang kita buat ini akan berjalan secara asyncronus
-	 */
-	@Test
-	public void testCreateThread() {
+    /*
+     * Cara membuat kita bisa buat Runnable terlebih dahulu
+     * Runnable adalah sebuah interface yang kita bisa gunakan untuk membuat proses Thread
+     * Setelah membuat Runnable kita bisa Membuat Thread dan diikuti deggan Runnable yang telah ktia buat
+     * sebelumnya
+     * setelah kita buat Thread nya, untuk menjalankan Thread nya ktia harus memanggil method yang bernama start();
+     * dan prohram therad yang kita buat ini akan berjalan secara asyncronus
+     */
+    @Test
+    void createThread() {
 		Runnable runnable = () -> {
 			System.out.println("Ini thread yang ke : "+ Thread.currentThread().getName());
 		};
@@ -38,11 +43,11 @@ class SpringJavaThreadApplication {
 		thread.start();
 	}
 
-	/**
-	 * contoh penggunaan Thread.sleep(timeMilis);
-	 */
-	@Test
-	public void testThreadSleep() {
+    /**
+     * contoh penggunaan Thread.sleep(timeMilis);
+     */
+    @Test
+    void threadSleep() {
 		Runnable runnable = () -> {
 			try{
 				Thread.sleep(1000);
@@ -64,11 +69,11 @@ class SpringJavaThreadApplication {
 		System.out.println("selesai");
 	}
 
-	/**
-	 * yang kita lakukan pada method testThreadSleep(); untuk melakukan menyunggu eksekusi program pada Object Runnable tidak lah baik, lebih baik kita menggunakan Thread.join();
-	 */
-	@Test
-	public void testThreadJoin() {
+    /**
+     * yang kita lakukan pada method testThreadSleep(); untuk melakukan menyunggu eksekusi program pada Object Runnable tidak lah baik, lebih baik kita menggunakan Thread.join();
+     */
+    @Test
+    void threadJoin() {
 
 		Runnable runnable = () -> {
 			try{
@@ -89,8 +94,8 @@ class SpringJavaThreadApplication {
 		}
 	}
 
-	@Test
-	public void testInterrupt() {
+    @Test
+    void interrupt() {
 		Runnable runnable = () -> {
 			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
 			for(var i = 0; i < 10; i++) {
@@ -120,12 +125,12 @@ class SpringJavaThreadApplication {
 	}
 
 
-	/**
-	 * dalam real projek nanti kita akan menggunakan cara seperti ini karna untuk proses 
-	 * thread yang membutuhkan waktu itu nga di lakukan secara manual seperti kita menggunakan Thread.sleep() dalam Object Runnable dalam real case nya.
-	 */
-	@Test
-	public void testInterruptReal() {
+    /**
+     * dalam real projek nanti kita akan menggunakan cara seperti ini karna untuk proses 
+     * thread yang membutuhkan waktu itu nga di lakukan secara manual seperti kita menggunakan Thread.sleep() dalam Object Runnable dalam real case nya.
+     */
+    @Test
+    void interruptReal() {
 		Runnable runnable = () -> {
 			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
 			for(var i = 0; i < 10; i++) {
@@ -153,9 +158,8 @@ class SpringJavaThreadApplication {
 	}
 
 
-
-	@Test
-	public void tesThreadSetName() {
+    @Test
+    void tesThreadSetName() {
 		Thread thread = new Thread(() -> {
 			System.out.println("sedang jalan pada thread : "+Thread.currentThread().getName());
 		});
@@ -170,8 +174,8 @@ class SpringJavaThreadApplication {
 	}
 
 
-	@Test
-	public void testThreadState() {
+    @Test
+    void threadState() {
 
 		Thread thread = new Thread(new Runnable() {
 			@Override
@@ -189,9 +193,27 @@ class SpringJavaThreadApplication {
 			}
 	}
 
+	@Test @SneakyThrows
+	public void testRaceConditon(){
+		Counter counter = new Counter();
+		Runnable runnable = () -> {
+			for (int i = 0; i < 1000; i++) {
+				counter.increment();
+			}
+		};
+		
+		Thread thread1 = new Thread(runnable);
+		Thread thread2 = new Thread(runnable);
+		Thread thread3 = new Thread(runnable);
 
+		thread1.start();
+		thread2.start();
+		thread3.start();
 
+		thread1.join();
+		thread2.join();
+		thread3.join();
 
-
-
+		System.out.println(counter.getIncrement());
+	}
 }
