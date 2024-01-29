@@ -478,5 +478,98 @@ public class Ewallet {
     }
 }
 ```
+# Thread Comunication
+Dalam multi thread programming, terkadang kita ingin suatu thread di eksekusi setelah thread tertentu di eksekusi, namun pada java programming language tidak ada cara otomatis untuk melakukan hal tersebut.  
+  
+Untuk melakukan hal tersebut biasanya kita akan membuat shared variable untuk diakses beberapa thread, misalnya seperti berikut ini :
+``` java
+public class ThreadTest {
 
+    private String name = null;
+
+    private Object lock = new Object();
+
+    @Test @SneakyThrows
+    public void manualThreadComunicationTest(){
+        Runnable runnable1 = () -> {
+            // disini akan menngecek apakah name == null
+            // jika null akan masuk di invinite loop
+            // jika tidak null maka akan masuk ke baris kode selanjutnya
+            while (name == null) {}
+            System.out.println("Name : "+name);
+        };
+
+        Runnable runnable2 = () -> {
+            name = "Allia Azahra";
+        };
+
+        Thread thread1 = new Thread(runnable1, "thread-1");
+        Thread thread2 = new Thread(runnable2, "thread-2");
+
+        thread2.start();
+        thread1.start();
+
+        thread2.join();
+        thread1.join();
+    }
+}
+```
+
+**NOTE :**
+> Pada contoh diatas kita menggunakan property `name` sebagai shared variable, dan pada runnable-1 propery `name` kita jadikan sebagai identifier. Jika variable name masih `null` maka runnable 1 akan melakukan looping hingga `name` tidak sama dengan `null`.  
+
+> Hal tersebut memungkinkan thread-1 menunggu thread lain untuk melakukan eksekusi kode.
+
+# Wait and Notify
+Kita telah mengetahui bahwa kita bisa melakukan thread communication dengan menggunakana shared variable dan variable tersebut di looping hingga terjadi perubahan pada variable tersebut.  
+  
+Sebenarnya cara tersebut sangat tidak direkomendasikan, karena sangat rentan terjadi invinite loop dan penggunaan Resource yang boros. Untungnya di Java programming memiliki fitur `wait()` dan `notify()` untuk menangani hal tersebut.  
+  
+Method `wait()` dan `notify()` berada pada package `java.lang.Object;` artinya semua class yang ada pada java memiliki method `wait()` dan `notify()`. Kitika kita memanggil `wait()` pada object maka proses eksekusi program akan di skipp(dilanjutkan ke proses lain) hingga object tersebut memanggil method `notify()`
+
+``` java
+public class ThreadTest {
+
+    private String name = null;
+
+    private Object lock = new Object();
+
+    @Test @SneakyThrows
+    public void testThreadComunitation(){
+        Runnable runnable1 = new Runnable() {
+            @Override @SneakyThrows
+            public void run() {
+                // disini kit melakukan lock
+                // namun berhubung disni name.wait()
+                // lock ini akan di skip(di unlock) dan thread akan ditruskan
+                // hingga name.notify() dipanggil
+                synchronized(lock) {
+                    lock.wait();
+                    System.out.println("Nama : "+name);
+                }
+            }
+        };
+
+        Runnable runnable2 = () -> {
+            synchronized(lock) {
+                name = "Allia Azahra";
+                lock.notify();
+            }
+        };
+
+        Thread thread1 = new Thread(runnable1, "thread-1");
+        Thread thread2 = new Thread(runnable2, "thread-2");
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+    }
+}
+```
+**NOTE :**
+> Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
+
+# 
 
