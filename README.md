@@ -31,15 +31,14 @@
  Untuk menjalankan `Thread` kita harus menanggil method yang bernama start();
  Example :
  ``` java
-	@Test
-	public void testCreateThread() {
-		Runnable runnable = () -> {
-			System.out.println("Ini thread yang ke : "+ Thread.currentThread().getName());
-		};
-
-		Thread thread = new Thread(runnable);
-		thread.start();
-	}
+@Test
+public void testCreateThread() {
+	Runnable runnable = () -> {
+		System.out.println("Ini thread yang ke : "+ Thread.currentThread().getName());
+	};
+	Thread thread = new Thread(runnable);
+	thread.start();
+}
  ```
 
 # Thread Sleep
@@ -49,28 +48,27 @@
  Namun perlu diperhatikan, Method sleep bisa menyebabkan error InterruptedException
  Example :
  ``` java 
- 	@Test
-	public void testThreadSleep() {
-		Runnable runnable = () -> {
-			try{
-				Thread.sleep(1000);
-				System.out.println("Ini thread dengan nama : "+ Thread.currentThread().getName());
-			}catch(InterruptedException ITX){
-				ITX.printStackTrace();
-			}
-		};
-
-		Thread thread = new Thread(runnable);
-		thread.start();
-		// ini ktia sleep thread nya selama 2 detik agar aksi print out yang ada pada Runnabel dapat ditampilkan
-		// menga apa saya lakukan seperti ini ? karna program ini itu berjalanya secara asynycronus 
+@Test
+public void testThreadSleep() {
+	Runnable runnable = () -> {
 		try{
-			Thread.sleep(2000);
+			Thread.sleep(1000);
+			System.out.println("Ini thread dengan nama : "+ Thread.currentThread().getName());
 		}catch(InterruptedException ITX){
 			ITX.printStackTrace();
 		}
-		System.out.println("selesai");
+	};
+	Thread thread = new Thread(runnable);
+	thread.start();
+	// ini ktia sleep thread nya selama 2 detik agar aksi print out yang ada pada Runnabel dapat ditampilkan
+	// menga apa saya lakukan seperti ini ? karna program ini itu berjalanya secara asynycronus 
+	try{
+		Thread.sleep(2000);
+	}catch(InterruptedException ITX){
+		ITX.printStackTrace();
 	}
+	System.out.println("selesai");
+}
  ```
 
 # Thread Join
