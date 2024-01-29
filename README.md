@@ -1,36 +1,34 @@
+# Requirement
+* Java dasar
+* Java oop
 
 # Concurency 
+ Concurrency adalah proses eksekusi program secara satu per satu, jadi dalam pemrosesan program nya tidak dapat melakukan multiple eksekusi atau dalam 1 waktu mengeksekusi lebih dari 1 program.  
 
- Concurrency adalah proses eksekusi program secara satu per satu
- jadi dalam pemrosesan program nya tidak dapat multiple eksekusi atau secara 1 waktu mengeksekusi lebih dari 1 program
- misal nya jika kita gambarkan dalam kehidupan sehari2 adalah, ketika ktia mandi setelah itu makan
- tentunya kita nga mungkin dong kita makan sambil mandi...awowaowaoawoaw...ya kali mau nasinya rasa sabun dan sampo :v, 
- nah pasti proses tersebut akan di lakukan secara satu per satu atau dalam istilah programming adalah Concurrency programming, 
- Sincronus, atau Blocking.
+ misal nya jika kita gambarkan dalam kehidupan sehari2 adalah :  
+ ketika ktia mandi setelah itu makan tentunya kita nga mungkin dong kita makan sambil mandi...awowaowaoawoaw...ya kali mau nasinya rasa sabun dan sampo :v,  
 
-# Parallel
+ nah pasti proses tersebut akan di lakukan secara satu per satu atau dalam istilah programming adalah ***Concurrency*** ***programming***, 
+ ***Sincronus***, atau ***Blocking***.
 
- Paraallel adalah proses eksekusi banyak program dalam 1 waktu.
- ini kebalikanya dari Concurrency
- misal kita gambarkan dalam kehidupan nyata adalah, ketika kita main mobilejen dan maki-maki musuh kita.....ya kali pas main ML/mobile legend nga maki-maki ..nga enak jirr...kurang greged minimal harus keluarin kata-kata "Ahh...anjig goblog..., Ahh Pantek, anjig, Dalampuki eeeee..." dan maka dari itu saya nobadkan gem ML/mobilegend jangan di mainkan saat bulan puasa nanti ya gaes heheh
+# Parall
+ Paraallel adalah proses eksekusi banyak program dalam 1 waktu.  
+ ini kebalikanya dari Concurrency, misal kita gambarkan dalam kehidupan nyata adalah, ketika kita main mobilejen dan maki-maki musuh kita.....ya kali pas main ML/mobile legend nga maki-maki ..nga enak jirr...kurang greged minimal harus keluarin kata-kata "Ahh...anjig goblog..., Ahh Pantek, anjig, Dalampuki eeeee..." dan maka dari itu saya nobadkan gem ML/mobilegend jangan di mainkan saat bulan puasa nanti ya gaes heheh.  
+   
+ Pada intinya Palarel programming adalah proses eksekusi beberapa program dalam 1 waktu.
 
 # Thread
+ Pada bahasa pemograman Java, implementasi dari palarel programming dapat menggunakan `java.lang.Thread`.
 
- di java implementasi consurrency dan parallel dapat menggunkan Thread
- Thread di representasikan oleh class yang bernama Thread yang berada di packaga java.lang
-
-# Thread Utama
-
- secara implisit atau secara kita tidak buatkan thread, ketika program java berjalan itu otomatis java akan membuat thread
- Dalam program java biasanya kode program kita akan jalan dalam thread yang bernama main
- begitupun jikalau kita menjallankann Unit test, program unit tes kita ketika di jalankan itu juga akan menggunakan thread
+# Thread Utama(main thread)
+ Ketika kita menjalankan program java, maka secara implisit java akan membuat thread dengan nama `main` untuk mengeksekusi baris program tersebut.  
+ Hal tersebut berlaku pada unit test juga.
 
 # Membuat Thread secara manual
+ Thread merupakan proses ringan, membuat Thread bukan berarti kita melakukan pekerjan. Untuk mmebuat Pekerjaan dalam Thread, kita perlu membaut object dari interface [`Runnable`](https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html), setelah itu object `Runnable` tersebut kita jadikan parameter saat kita meng inisialisasi Object `Thread` nya.  
 
- Thread merupakan proses ringan, membuat Thread bukan berarti kita melakukan pekerjan.
- Untuk mmebuat Pekerjaan dalam Thread, kita perlu membaut onbject dari interface Runnable, selanjutnya object Runnable tersebut kita jadikan parameter saat kita meng inisialisasi Object Thread nya
- Saat Thread berjalan, Thread akan berjalan secara ascyncronus, artinya dia akan berjalan sendiri dan kode program kita akan berlanjut ke kode program selanjutnya
- Untuk menjalankan Thread kita harus menanggil method yang bernama start();
+ Saat `Thread` berjalan, `Thread` akan berjalan secara ascyncronus, artinya dia akan berjalan sendiri dan kode program kita akan berlanjut ke kode program selanjutnya
+ Untuk menjalankan `Thread` kita harus menanggil method yang bernama start();
  Example :
  ``` java
 	@Test
@@ -45,11 +43,9 @@
  ```
 
 # Thread Sleep
-
- Pada proses development, kadang kita memerlukan simulasi proses yang berjalan dalam waktu tertentu
- Untuk melakukan hal ini kita bisa memanfaatkan fitur Thread.sleep(timeMilis); yang terdapat pada Java programing langguage.
- Dengan menggunakan Thread.sleep(timeMilis); kita bisa membuat thread tertidur dan berhenti dalam waktu yang kita tentukan
- Untuk melakukan hal ini, kita bisa memanggil static method sleep(); di class Thread, Maka secara otomatis Thread saat itu akan tertidur atau berhenti berproses sementara sesuai waktu yang telah kita berikan pada peremeter method sleep();
+ Pada proses development, kadang kita memerlukan simulasi proses yang berjalan dalam waktu yang agak lama untuk mensimulasikan proses yang kompleks.  
+ Untuk melakukan hal tersebut kita bisa memanfaatkan `Thread.sleep(timeMilis);` yang terdapat pada Java programing langguage.  
+ Dengan menggunakan `Thread.sleep(timeMilis);` kita bisa membuat thread tertidur dan berhenti dalam waktu yang kita tentukan. Untuk melakukan hal ini, kita bisa memanggil static method `sleep();` di class Thread, Maka secara otomatis Thread saat itu akan tertidur atau berhenti berproses sementara sesuai waktu yang telah kita berikan pada peremeter method `sleep();`  
  Namun perlu diperhatikan, Method sleep bisa menyebabkan error InterruptedException
  Example :
  ``` java 
@@ -78,11 +74,10 @@
  ```
 
 # Thread Join
-
  Jika thread di sleep atau thread sendang dalam keadaan proses yang lumayan komplex, kadang kita perlu mennunggu thread tersebut selesai mengerjakan pekerjaanya.
- Di cara yang sebelum nya kita menggunakan Thread.sleep(TimeMilis); untuk mengatasinya, sebenarnya cara tersebut 
- tidak baik karna pada Real nya nanti kita tidak tau berapa lama thread akan berjalan meng eksekusi program yang kita buat
- Untuk mengatasi permasalah tersebut kita bisa menggunakan Thread.join();
+
+ Di cara yang sebelum nya kita menggunakan `Thread.sleep(TimeMilis);`  
+ untuk mengatasinya, sebenarnya cara tersebut tidak baik karna pada Real nya nanti kita tidak tau berapa lama thread akan berjalan meng eksekusi program yang kita buat. Untuk mengatasi permasalah tersebut kita bisa menggunakan `Thread.join();`  
  Example :
  ``` java
  	@Test
@@ -109,13 +104,13 @@
 
  ```
 
-# Thread Interrupt
+# Thread Interrupted
+ Interrupted merupakan sinyal yang dikirim ke current thread bahwa thread tersebut harus berhenti melakukan pekerjaanya.
+ 
+ Interrupted ini biasanya digunakan jikalau terdapat permasalahan tertentu saat thread kita berjalan, dan kita ingin memberhentikan thread tersebut.  
 
- Interrupted merupakan mengirim sinyal ke thread bahwa thread tersebut harus berhenti melakukan pekerjaanya
- Untuk melakukan Interrupt, kita bisa menggunkan method inturept(); pada thread
- Saat kita memanggil method intrrupt();, secara otomatid Thread.interupted() akan bernilai true
- Saat kita membuat interrupt();, pada kode Runnable kita harus mengecek Interupted() tersebut, jika nga ngecek 
- maka interrupt kita nga ada gunanya
+ Ketika kita mengirimkan sinyal `interrupt` kepada current thread maka pada `runnable` kita harus mengecek apakah sinyal `interrupt` ada, jikalau ada maka kita bisa membuatkan exception handling.
+
  Example :
  ``` java
  	@Test
@@ -185,10 +180,9 @@
  ```
 
 # Thread Name
-
  Secara Default Thread di java memiliki nama, 
  Thread name secara default akan menggunkan nama Thread-{counter}
- Namun kita bisa juga mengubahnya dengan menggunkan method setName(name), dab getName() untuk mendapatkan thread name nya
+ Namun kita bisa juga mengubahnya dengan menggunkan method `setName(name)`, dan `getName()` untuk mendapatkan thread name nya
  Example :
  ``` java
  	@Test
@@ -208,44 +202,44 @@
  ```
 
 # Thread state
+ Thread state yaitu informasi dari state pada thread. Terdapat 3 state dalam thread, yaitu :
+ | State 	 | Description
+ |---------- |---------------
+ | NEW		 | Thread pertama kali dibuat
+ | Runnable  | Thread Sedang Berjalan
+ | TERMINATED| Thread dimatikan
 
- Thread state yaitu informasi dari state pada thread
- State digunakan jika kita ingin melihat atau mendapatkan informasi pada thread yang kita inignkan
- State akan berubah setatus nya sesuai dengan apa yang terjadi di thread
- untuk menggunkan data state kita bisa menggunakan method getState() dan akan mengembalikan informasi dengan tipe data enum
+ Thread state ini biasanya kita gunakan unutk mengetahui sampai mana status thread, apakah ***Runnable*** atau ***Terminated*** dan sebagainya.  
+ 
+ Untuk mengetahui status state thread kita bisa menggunakan method `getState()`.
  Example :
  ``` java
-    @Test
- 	public void testThreadState() {
-
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println(Thread.currentThread().getState());
-				System.out.println("test thread "+Thread.currentThread().getName());
-			} }, "thread_state");
-			try{
-				System.out.println(thread.getState());
-				thread.start();
-				thread.join();
-				System.out.println(thread.getState());
-			}catch(InterruptedException ITX){
-				ITX.printStackTrace();
-			}
-	}
-
+@Test @SneakyThrows
+public void threadState1(){
+	Runnable runnable = () -> {
+		// thread sedang berjalan : RUNNABLE
+		System.out.println(Thread.currentThread().getState().name());
+	};
+	Thread thread = new Thread(runnable);
+	// Thread pertama kali dubuat : NEW
+	System.out.println(thread.getState());
+	thread.start();
+	thread.join();
+	// Thread dimatikan : TERMINATED
+	System.out.println(thread.getState());
+}
  ```
 
 # Thread Deamond
+ Secara default, saat kita membuat thread,thread tersebut disebut sebagai user thread.
+ Untuk program java (bukan program java unit test/JUNIT) secara defaut akan menunggu semua user thread selesai 
+ sebelum program di berhentikan.  
 
- secara default, saat kita membuat thread,thread tersebut disebut sebagai user thread
- untuk program java (bukan program java unit test/JUNIT) secara defaut akan menunggu semua user thread selesai 
- sebelum program di berhentikan.
- jika kita mengubah thread menjadi deamon thread, menggunakan method setDeamon(true) maka secara otomatis thread 
- tersebut akan menjadi deamon thread
- Deamon thread tidak akan di tunggu jika memang program java akan berhenti
- Namun jika kita menghetikan program java dengan System.exit() maka semua user thread pun akan berhenti.
- Example :
+ jika kita mengubah thread menjadi deamon thread, menggunakan method `setDeamon(true)` maka secara otomatis thread tersebut akan menjadi deamon.  
+ 
+
+ Daemon thread tidak akan di tunggu jika memang program java akan berhenti Namun jika kita menghetikan semua thread maka ktia bisa menggunakan `System.exit()` maka semua user thread pun akan berhenti.  
+ **Example :**
  ``` java
  import java.lang.InterruptedException;
 
@@ -317,6 +311,104 @@ public void testRaceConditon(){
 
 	// seharusnya jumlah dari incremnt nya 3000 tapi karena terjadi race condition hasilnya tidak sesuai
 	System.out.println(counter.getIncrement());
+}
+```
+
+# Syncronized Method Counter
+Syncronization ini memungkinkan suatu block code hanya boled di eksekusi oleh 1 thread dalam satu waktu.  
+Pada bahsa pemograman java terdapat dua jenis syncronization :
+* synchronized method
+* synchronized statement
+
+### synchronized method
+Unutuk menggunakan synchronized method caranya cukup mudah, kita hanya perlu menambahkan keyword `synchronized` sebelum nama method yang hanya boleh di eksekusi oleh 1 thread dalam 1 waktu.
+``` java
+@Setter @Getter @AllArgsConstructor @NoArgsConstructor
+public class SyncronusMethodCounter {
+
+    private Long increment = 0L;
+
+    public synchronized void increment() {
+        this.increment++;
+    }
+}
+```
+``` java
+@Test @SneakyThrows
+public void testSysncronizedMethod() {
+	SyncronusMethodCounter syncronusMethodCounter = new SyncronusMethodCounter();
+	Runnable runnable = () -> {
+		for (int i = 0; i < 1000; i++) {
+			syncronusMethodCounter.increment();		
+		}
+	};
+	
+	Thread thread1 = new Thread(runnable);
+	Thread thread2 = new Thread(runnable);
+	Thread thread3 = new Thread(runnable);
+	
+	thread1.run();
+	thread2.run();
+	thread3.run();
+
+	thread1.join();
+	thread2.join();
+	thread3.join();
+	
+	Assertions.assertEquals(3000, syncronusMethodCounter.getIncrement());
+}
+```
+### sysncronized statement
+Untuk menggunakan sysncronized statement caranya cukup mudah, kita hanya perlu menggunakan keyword `sysncronized (object)` dengan parameter object yang kita iniginkan.  
+  
+Object pada parameter `sysncronized` akan digunakan untuk melakukan locking. Sehingga dengan demikian setiap 1 thread yang sedang melakukan eksekusi block kode akan di lock, artinya dalam 1 waktu hanya 1 thread yang diizinkan melakukan eksekusi block code.  
+
+
+``` java
+@Setter @Getter @AllArgsConstructor @NoArgsConstructor
+public class SyncronizeStatementCounter {
+    
+    private Long counter = 0L;
+
+    private Long counter2 = 0L;
+
+    private Long counter3 = 0L;
+
+    public void increment() {
+        // counter2 bisa dieksekusi multiple thread
+		counter2++;
+        synchronized (this){
+			// counter hanya bisa di eksekusi 1 thread dalam 1 waktu
+            this.counter++;
+        }
+		// counter3 bisa di eksekusi multiple thread
+        counter3++;
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void testSynchronizedStatement(){
+	SyncronizeStatementCounter syncronizeStatementCounter = new SyncronizeStatementCounter();
+	Runnable runnable = () -> {
+		for (int i = 0; i < 1000; i++) {
+			syncronizeStatementCounter.increment();
+		}	
+	};
+	Thread thread1 = new Thread(runnable);
+	Thread thread2 = new Thread(runnable);
+	Thread thread3 = new Thread(runnable);
+
+	thread1.start();
+	thread2.start();
+	thread3.start();
+
+	thread1.join();
+	thread2.join();
+	thread3.join();
+
+	Assertions.assertEquals(3000, syncronizeStatementCounter.getCounter());
 }
 ```
 
