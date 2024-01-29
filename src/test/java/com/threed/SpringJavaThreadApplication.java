@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.threed.helper.Counter;
+import com.threed.helper.Ewallet;
 import com.threed.helper.SyncronizeStatementCounter;
 import com.threed.helper.SyncronusMethodCounter;
 
@@ -298,10 +299,63 @@ class SpringJavaThreadApplication {
 		Runnable runnable = () -> {
 			System.out.println(Thread.currentThread().getState().name());
 		};
+
 		Thread thread = new Thread(runnable);
 		System.out.println(thread.getState());
 		thread.start();
 		thread.join();
 		System.out.println(thread.getState());
+	}
+
+	@Test @SneakyThrows
+	public void testDeadLock() {
+		Ewallet ewallet1 = new Ewallet(10_000L);
+		Ewallet ewallet2 = new Ewallet(10_000L);
+		
+		Runnable tranfer1 = () -> {
+			Ewallet.tranferDeadLock(ewallet1, ewallet2, 5_000L);
+		};
+
+		Runnable tranfer2 = () -> {
+			Ewallet.tranferDeadLock(ewallet2, ewallet1, 5_000L);
+		};
+
+		Thread thread1 = new Thread(tranfer1);
+		Thread thread2 = new Thread(tranfer2);
+
+		thread1.start();
+		thread2.start();
+
+		thread1.join();
+		thread2.join();
+
+		System.out.println("Ewalet 1 : " + ewallet1.getBalance());
+		System.out.println("Ewalet 2 : " + ewallet2.getBalance());
+	}
+
+	@Test @SneakyThrows
+	public void tranferNoDeadLock(){
+		Ewallet ewallet1 = new Ewallet(10_000L);
+		Ewallet ewallet2 = new Ewallet(10_000L);
+		
+		Runnable tranfer1 = () -> {
+			Ewallet.tranfer(ewallet1, ewallet2, 5_000L);
+		};
+
+		Runnable tranfer2 = () -> {
+			Ewallet.tranfer(ewallet2, ewallet1, 5_000L);
+		};
+
+		Thread thread1 = new Thread(tranfer1);
+		Thread thread2 = new Thread(tranfer2);
+
+		thread1.start();
+		thread2.start();
+
+		thread1.join();
+		thread2.join();
+
+		System.out.println("Ewalet 1 : " + ewallet1.getBalance());
+		System.out.println("Ewalet 2 : " + ewallet2.getBalance());
 	}
 }
