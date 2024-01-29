@@ -404,4 +404,79 @@ public void testSynchronizedStatement(){
 }
 ```
 
-# 
+# Dead Lock
+Permasalahan saat kita menggunakan `synchronized` adalah ***dead lock***.  
+Dead lock adalah suatu kondisi ketika beberapa thread saling menunggu dengan thread lainya, misalnya :  
+Thread 1 melakukan lock kepada thread 2, dan thread 2 melakukan lock pada thread 1. Maka yang akan terjadi keuda thread tersebut saling menunggu.
+
+``` java
+@Setter @Getter @AllArgsConstructor @NoArgsConstructor
+public class Ewallet {
+
+    private Long balance = 0L;
+
+    @SneakyThrows
+    public static void tranferDeadLock(Ewallet from, Ewallet to, Long blance) {
+        synchronized(from) {
+            Thread.sleep(1000L);
+            synchronized(to) {
+                from.setBalance(from.getBalance() - blance);
+                to.setBalance(to.getBalance() + blance);
+            }
+        }
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void testDeadLock() {
+	Ewallet ewallet1 = new Ewallet(10_000L);
+	Ewallet ewallet2 = new Ewallet(10_000L);
+		
+	Runnable tranfer1 = () -> {
+		Ewallet.tranferDeadLock(ewallet1, ewallet2, 5_000L);
+	};
+	
+	Runnable tranfer2 = () -> {
+		Ewallet.tranferDeadLock(ewallet2, ewallet1, 5_000L);
+	};
+
+	Thread thread1 = new Thread(tranfer1);
+	Thread thread2 = new Thread(tranfer2);
+
+	thread1.start();
+	thread2.start();
+
+	thread1.join();
+	thread2.join();
+
+	System.out.println("Ewalet 1 : " + ewallet1.getBalance());
+	System.out.println("Ewalet 2 : " + ewallet2.getBalance());
+}
+```
+
+Untuk menghindari dead lock tidak ada cara khusus nya, melainkan kita sebagai programmer harus benar-benar mepertimbangkan saat menggunakan synchronized. misalnya untuk meresolve kode dead lock diatas kita bisa memisahkan proses locing `synchronized` nya
+
+``` java
+@Setter @Getter @AllArgsConstructor @NoArgsConstructor
+public class Ewallet {
+
+    private Long balance = 0L;
+
+    @SneakyThrows
+    public static void tranfer(Ewallet from, Ewallet to, Long blance) {
+        synchronized(from) {
+            Thread.sleep(1000L);
+            from.setBalance(from.getBalance() - blance);
+        }
+        
+        synchronized(to) {
+            Thread.sleep(1000L);
+            to.setBalance(to.getBalance() + blance);
+        }
+    }
+}
+```
+
+
