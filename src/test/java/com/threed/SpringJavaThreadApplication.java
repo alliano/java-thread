@@ -1,8 +1,11 @@
 package com.threed;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.threed.helper.Counter;
+import com.threed.helper.SyncronizeStatementCounter;
+import com.threed.helper.SyncronusMethodCounter;
 
 import lombok.SneakyThrows;
 
@@ -74,7 +77,6 @@ class SpringJavaThreadApplication {
      */
     @Test
     void threadJoin() {
-
 		Runnable runnable = () -> {
 			try{
 				Thread.sleep(1000);
@@ -176,7 +178,6 @@ class SpringJavaThreadApplication {
 
     @Test
     void threadState() {
-
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -201,7 +202,7 @@ class SpringJavaThreadApplication {
 				counter.increment();
 			}
 		};
-		
+
 		Thread thread1 = new Thread(runnable);
 		Thread thread2 = new Thread(runnable);
 		Thread thread3 = new Thread(runnable);
@@ -215,5 +216,92 @@ class SpringJavaThreadApplication {
 		thread3.join();
 
 		System.out.println(counter.getIncrement());
+	}
+
+	@Test @SneakyThrows
+	public void testSysncronizedMethod() {
+		SyncronusMethodCounter syncronusMethodCounter = new SyncronusMethodCounter();
+		Runnable runnable = () -> {
+			for (int i = 0; i < 1000; i++) {
+				syncronusMethodCounter.increment();		
+			}
+		};
+
+		Thread thread1 = new Thread(runnable);
+		Thread thread2 = new Thread(runnable);
+		Thread thread3 = new Thread(runnable);
+
+		thread1.run();
+		thread2.run();
+		thread3.run();
+
+		thread1.join();
+		thread2.join();
+		thread3.join();
+
+		Assertions.assertEquals(3000, syncronusMethodCounter.getIncrement());
+	}
+
+	@Test @SneakyThrows
+	public void testSynchronizedStatement(){
+		SyncronizeStatementCounter syncronizeStatementCounter = new SyncronizeStatementCounter();
+		Runnable runnable = () -> {
+			for (int i = 0; i < 1000; i++) {
+				syncronizeStatementCounter.increment();
+			}	
+		};
+
+		Thread thread1 = new Thread(runnable);
+		Thread thread2 = new Thread(runnable);
+		Thread thread3 = new Thread(runnable);
+
+		thread1.run();
+		thread2.run();
+		thread3.run();
+
+		thread1.join();
+		thread2.join();
+		thread3.join();
+
+		Assertions.assertEquals(3000, syncronizeStatementCounter.getCounter());
+	}
+
+	@Test @SneakyThrows
+	public void testSynchronizedStatement2(){
+		SyncronizeStatementCounter syncronizeStatementCounter = new SyncronizeStatementCounter();
+		Runnable runnable = () -> {
+			for (int i = 0; i < 1000; i++) {
+				System.out.println(Thread.currentThread().getName());
+				syncronizeStatementCounter.increment();
+			}
+		};
+
+		Thread thread1 = new Thread(runnable, "Thread-1");
+		Thread thread2 = new Thread(runnable, "Thread-2");
+		Thread thread3 = new Thread(runnable, "Thread-3");
+
+		thread1.start();
+		thread2.start();
+		thread3.start();
+
+		thread1.join();
+		thread2.join();
+		thread3.join();
+
+		Assertions.assertEquals(3000, syncronizeStatementCounter.getCounter());
+		System.out.println("counter-2 = "+syncronizeStatementCounter.getCounter2());
+		System.out.println("counter-3 = "+syncronizeStatementCounter.getCounter3());
+	}
+
+	@Test @SneakyThrows
+	public void threadState1(){
+		Runnable runnable = () -> {
+			System.out.println(Thread.currentThread().getState().name());
+		};
+		Thread thread = new Thread(runnable);
+		System.out.println(thread.getState());
+		thread.start();
+		thread.join();
+		System.out.println(thread.getState());
 	}
 }
