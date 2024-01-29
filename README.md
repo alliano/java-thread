@@ -80,28 +80,26 @@
  untuk mengatasinya, sebenarnya cara tersebut tidak baik karna pada Real nya nanti kita tidak tau berapa lama thread akan berjalan meng eksekusi program yang kita buat. Untuk mengatasi permasalah tersebut kita bisa menggunakan `Thread.join();`  
  Example :
  ``` java
- 	@Test
-	public void testThreadJoin() {
-
-		Runnable runnable = () -> {
-			try{
-				Thread.sleep(1000);
-				System.out.println("Sekarang Sedang menggunakan thread : "+Thread.currentThread().getName());
-			}catch(InterruptedException ITX) {
-				ITX.printStackTrace();
-			}
-		};
-		Thread thread = new Thread(runnable);
-		thread.start();
-		try {
-			//setelah Thread di start maka kode eksekusi program ini akan di block oleh thread.join(); untuk menngunggy eksekusi program yang ada pada Runnable selesai
-			thread.join();
-			System.out.println("Selesai");
+@Test
+public void testThreadJoin() {
+	Runnable runnable = () -> {
+		try{
+			Thread.sleep(1000);
+			System.out.println("Sekarang Sedang menggunakan thread : "+Thread.currentThread().getName());
 		}catch(InterruptedException ITX) {
 			ITX.printStackTrace();
 		}
+	};
+	Thread thread = new Thread(runnable);
+	thread.start();
+	try {
+		//setelah Thread di start maka kode eksekusi program ini akan di block oleh thread.join(); untuk menngunggy eksekusi program yang ada pada Runnable selesai
+		thread.join();
+		System.out.println("Selesai");
+	}catch(InterruptedException ITX) {
+		ITX.printStackTrace();
 	}
-
+}
  ```
 
 # Thread Interrupted
@@ -113,35 +111,34 @@
 
  Example :
  ``` java
- 	@Test
-	public void testInterrupt() {
-		Runnable runnable = () -> {
-			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
-			for(var i = 0; i < 10; i++) {
-				System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
-				// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
-				try{
-					Thread.sleep(1000);
-				}catch(InterruptedException ITX) {
-					return;
-				}
+ @Test
+public void testInterrupt() {
+	Runnable runnable = () -> {
+		//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
+		for(var i = 0; i < 10; i++) {
+			System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
+			// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
+			try{
+				Thread.sleep(1000);
+			}catch(InterruptedException ITX) {
+				return;
 			}
-		};
-
-		Thread thread = new Thread(runnable);
-		thread.start();
-		// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
-		try {
-			Thread.sleep(2000);
-			// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
-			thread.interrupt();
-			System.out.println("Proses Eksekusi pada Runnable Selesai");
-			thread.join();
-			System.out.println("Program Selesai");
-		}catch(InterruptedException ITX) {
-			ITX.printStackTrace();
 		}
+	};
+	Thread thread = new Thread(runnable);
+	thread.start();
+	// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
+	try {
+		Thread.sleep(2000);
+		// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
+		thread.interrupt();
+		System.out.println("Proses Eksekusi pada Runnable Selesai");
+		thread.join();
+		System.out.println("Program Selesai");
+	}catch(InterruptedException ITX) {
+		ITX.printStackTrace();
 	}
+}
  ```
 
  ``` java
@@ -149,34 +146,33 @@
 	 * dalam real projek nanti kita akan menggunakan cara seperti ini karna untuk proses 
 	 * thread yang membutuhkan waktu itu nga di lakukan secara manual seperti kita menggunakan Thread.sleep() dalam Object Runnable dalam real case nya.
 	 */
-	@Test
-	public void testInterruptReal() {
-		Runnable runnable = () -> {
-			//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
-			for(var i = 0; i < 10; i++) {
-				System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
-				// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
-				if(Thread.interrupted()){
-					return;
-				}
+@Test
+public void testInterruptReal() {
+	Runnable runnable = () -> {
+		//contoh seumpamanya disini melakukan proses yang lumayan komplex sehingga membutuhkan beberapa waktu
+		for(var i = 0; i < 10; i++) {
+			System.out.println("Proses Komplex Sedang di Exsekusi ke "+i);
+			// jika Thread.interrupted() bernilai true maka eksekusi program pada runnable akan dihentikan
+			if(Thread.interrupted()){
+				return;
 			}
-		};
-
-		Thread thread = new Thread(runnable);
-		thread.start();
-		// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
-		try {
-			Thread.sleep(2000);
-			// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
-			thread.interrupt();
-			System.out.println("Proses Eksekusi pada Runnable Selesai");
-			thread.join();
-			System.out.println("Program Selesai");
-		}catch(InterruptedException ITX) {
-			ITX.printStackTrace();
 		}
-	}
+	};
 
+	Thread thread = new Thread(runnable);
+	thread.start();
+	// disini kita simulasikan jika program pada Runnable itu dierksekusi dan membuathkan waktu yang lebih dari 2 detik maka kita akan berhentikan program pada Runnable tersebut
+	try {
+		Thread.sleep(2000);
+		// disini kita kirim sinyal interupt setelah 2 detik dan program pada Runnable akan di berhentikan
+		thread.interrupt();
+		System.out.println("Proses Eksekusi pada Runnable Selesai");
+		thread.join();
+		System.out.println("Program Selesai");
+	}catch(InterruptedException ITX) {
+		ITX.printStackTrace();
+	}
+}
  ```
 
 # Thread Name
@@ -185,20 +181,19 @@
  Namun kita bisa juga mengubahnya dengan menggunkan method `setName(name)`, dan `getName()` untuk mendapatkan thread name nya
  Example :
  ``` java
- 	@Test
-	public void tesThreadSetName() {
-		Thread thread = new Thread(() -> {
-			System.out.println("sedang jalan pada thread : "+Thread.currentThread().getName());
-		});
-		thread.setName("Fetching_Thirdparti_Api");
-		thread.start();
-		
+ @Test
+public void tesThreadSetName() {
+	Thread thread = new Thread(() -> {
+		System.out.println("sedang jalan pada thread : "+Thread.currentThread().getName());
+	});
+	thread.setName("Fetching_Thirdparti_Api");
+	thread.start();	
 
-		//atau kita juga bisa langsung meng set name nya pada constructor saat kita meng inisialisasi object Thread nya
-		Thread thread2 = new Thread(() -> {
-			System.out.println("sedang menjalakan thread dengan nama : "+Thread.currentThread().getName()); }, "Fetching_Payment");
-			thread2.start();
-	}
+	//atau kita juga bisa langsung meng set name nya pada constructor saat kita meng inisialisasi object Thread nya
+	Thread thread2 = new Thread(() -> {
+		System.out.println("sedang menjalakan thread dengan nama : "+Thread.currentThread().getName()); }, "Fetching_Payment");
+		thread2.start();
+}
  ```
 
 # Thread state
@@ -241,7 +236,6 @@ public void threadState1(){
  Daemon thread tidak akan di tunggu jika memang program java akan berhenti Namun jika kita menghetikan semua thread maka ktia bisa menggunakan `System.exit()` maka semua user thread pun akan berhenti.  
  **Example :**
  ``` java
- import java.lang.InterruptedException;
 
 public class DaemonThread {
 
