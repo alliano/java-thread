@@ -530,6 +530,7 @@ Method `wait()` dan `notify()` berada pada package `java.lang.Object;` artinya s
 ``` java
 public class ThreadTest {
 
+	// shared variable
     private String name = null;
 
     private Object lock = new Object();
@@ -569,7 +570,56 @@ public class ThreadTest {
 }
 ```
 **NOTE :**
-> Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
+> Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread1 akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
 
-# 
+# Timer
+Terkadang kita memiliki kasus dimana kita ingin mengeksekusi suatu baris program tertentu(***delay job***) atau baris program tersebut di eksekusi secara berulang kali(***repeted job***) sesuai dengan waktu yang kita inginkan secara *asyncronus*.  
+  
+Untuk mengatasi masalah tersebut kita bisa menggunakan [`Timer`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Timer.html). Denga menggunakan `Timer` kita bisa membuat baris programn yang dapat di eksekusi di waktu yang akan datang secara asyncrous, baik program tersebut di eksekusi hanya sekali ataupun berkali-kali.
+
+``` java
+ @Test @SneakyThrows
+public void delayJob(){
+   TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println("Job one executed......");
+        }
+    };
+
+    Timer timer = new Timer();
+    /**
+     * timer task akan dieksekusi
+     * setelah 5 detik
+     */
+    timer.schedule(timerTask, 5000L);
+
+    Thread.sleep(6000L);
+}
+
+@Test @SneakyThrows
+public void repetedJob(){
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println("Job repeted executed.....");
+        }
+    };
+
+    Timer timer = new Timer();
+    /**
+     * timerTask akan dieksekusi 1 detik sekali
+     * dan diulangi eksekusi tersebut setelah 2 detik
+     * 
+     * simpelnya eksekusi setelh 1 detik dan istirahat selama 2 detik
+     * dan proses tersebut berulang-ulang kali
+     */
+    timer.schedule(timerTask, 1000L, 2000L);
+
+    Thread.sleep(5000L);
+}
+```
+**NOTE :**
+> Penggunaan `Time` dan `TimerTask` biasanya digunakan untuk membuat job yang dikesekusi di background
+
 
