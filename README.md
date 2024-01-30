@@ -572,4 +572,3 @@ public class ThreadTest {
 > Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
 
 # 
-
