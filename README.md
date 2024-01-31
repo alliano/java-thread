@@ -623,3 +623,83 @@ public void repetedJob(){
 > Penggunaan `Time` dan `TimerTask` biasanya digunakan untuk membuat job yang dikesekusi di background
 
 
+
+> Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
+
+# High Level Concurrency
+Selama ini yang telah kita pelajari adalah **penggunaan Thread secara manual**.  
+Saat java versi 5 rilis, Java versi 5 memperkenalkan fitur yang bernama ***Concurrency Utilities***. Fitur ***Concurrency Utilitys*** ini memuat dukungan high level API untuk membuat *Thread* menjadi lebih mudah.
+
+Dengan demikian ketika kita membuat applikasi *Multi threaded* menjadi lebih mudah dan dapat meminimalisir terjadinya bug pada thread, misalnya seperti :
+* Race condition
+* Synchronization
+* DeadLock
+* dan sebagainya
+
+Fitur ***Concurrency Utilities*** memperkenalkan 3 package baru, yaitu :
+* `java.util.concurrent..`
+* `java.util.concurrent.atomic..`
+* `java.util.concurrent.locks..`
+
+### Why we need High Level API To Create Thread ? 🤔🤔
+Perlu diketahui, melakukan menejemen dan pembuatan thread secara manual bukanlah cara yang baik karena sangat rentan terjadi error, terutama pada :
+* Deadlock
+* Race Condition
+
+Selain itu, membaut dan melakukan menejemen *thread* secara manual sangat tidak flexibel. Oleh karna itu ketika kita ingin membuat applikasi yang multi threaded lebih baik menggunakan ***Concurrncy Utilitis***
+
+
+**NOTE :**
+> Setelah kita mengetahui tentang ***Concurrncy Utilities*** sangat direkomndasikan saat kita membuat thread menggunakan cara high level nya(Menggunakan fitur Concurrency Utilities)
+
+
+# Menejeman Thread
+Thread merupakan object yang lumayan besar, ketika kita membuat thread secara manual bisa memakan resource memory sebesar 512kb sampai 1mb.  
+  
+Jika kita lalai dalam melakukan menejemen thread maka tidak menitup kemungkinan applikasi yang kita buat bisa kehabisan memory sehingga dapat menyebabkan exception `OutOfMemory`.  
+  
+Secara low level membuat object `Thread` baru tidak semudah membuat object biasa, karena ketika kita membuat object thread baru yang terjadi secara low levelnya yaitu sistem operasi akan membuatkan thread baru secara native dan akan memakan resource yang lumayan besar.  
+  
+Membuat atau melakukan menejeman `Thread` secara manual sangat tidak direkomendasikan. Untung nya pada java versi moderen saat ini java memperkenalkan class yang dapat digunakan untuk membuat dan melakukan menejemn `Thread` secara otomatis, yaitu class `ThreadPool`.
+
+# Thread pool
+`ThreadPool` adalah sebuah class yang digunakan untuk menejemen Thread di ***Concurrency Utilities***. Denga menggunakan `ThreadPool` kita tidak perlu lagi membuat thread secara manual karena pembuatan thread nya sudah di handle oleh `ThreadPool`.  
+  
+Kelebihan menggunakan `ThreadPool` adalah kita bisa mereusable *Thread* yang sudah tidak terpakai, dan masih banyak lagi kelebiahan dari `ThreadPool`. ThreadPool di java di representasikan oleh class [`ThreadPoolExecutor`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html)  
+
+## ThreadPool Setings
+Sebelum kita menggunakan `ThreadPool` ada baiknya kita menegtahui pengaturan-pengaturan untuk membuat `ThreadPoolExecutor`, berikut ini pengaturan nya :
+|	**Setings**		| **Description**
+|-------------------|--------------------
+|	core pool		| Minimal thread yang akan dibuat ketika thread pool dibuat
+|	max pool		| Maksimal thread yang akan dibuat
+|	keep alive time | Berapa lama thread akan dihapus ketika thread tidak bekerja(tidak digunakan)
+|	queue			| Antrian yang digunakan untuk menampung pekerjaan sebelum dikirim ke `ThreadPool`
+
+Berikut ini contoh pembuatan `ThreadPoolExecutor`
+``` java
+public class ThreadPool {
+
+    @Test
+    public void threadPoolCreateTest() {
+        // ThreadPool Setings
+        int corePoolSize = 10;
+        int maxPoolSize = 1000;
+        int keepAliveTime = 1;
+        TimeUnit aliveTime = TimeUnit.MINUTES;
+        ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
+
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, aliveTime, queue);
+        Assertions.assertNotNull(threadPoolExecutor);
+    }
+}
+```
+
+**Diagram ThreadPoolExecutor**
+![threadPool](/src/main/resources/images/thread-pool-queue.webp)
+
+**Ket :**
+> Task akan masuk di queue dan akan mengantri hinga diambil oleh thread
+
+Untuk lebih detailnya bisa kunjungi disini :  
+* https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html
