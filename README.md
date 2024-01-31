@@ -627,17 +627,30 @@ public class ThreadPool {
 
     @Test
     public void threadPoolCreateTest() {
-        // ThreadPool Setings
+        /**
+         * ini artinya ketika ThreadPoolExecutor dibuat
+         * maka minimal thread yang akan dibuat adalah 10 thread
+         */
         int corePoolSize = 10;
-        int maxPoolSize = 1000;
+        // makdimal thread yang dibuat 100 thread
+        int maxPoolSize = 100;
+        /**
+         * ini tergantung pada TimeUnit
+         * jika TimeUnit nya TimeUnit.HOURS
+         * maka artinya 1 hari
+         * 
+         * jika TimeUnit.MINUTES maka artinya 1 menit
+         */
         int keepAliveTime = 1;
         TimeUnit aliveTime = TimeUnit.MINUTES;
+        // ini artinya hanya menerima 100 antrian
         ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
 
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, aliveTime, queue);
         Assertions.assertNotNull(threadPoolExecutor);
     }
 }
+
 ```
 
 **Diagram ThreadPoolExecutor**
@@ -648,3 +661,109 @@ public class ThreadPool {
 
 Untuk lebih detailnya bisa kunjungi disini :  
 * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html
+
+## Mengeksekusi Runnable
+Setelah kita mengetahui cara membuat `ThreadPoolExecutor` mungkin kita bertanya-tanya bagaimana cara mengeksekusi task atau object `Runnable`.  
+
+Untuk melakukan eksekusi task atau `Runnable` kita bisa menggunakan method `execute(runnable)` milik `ThreadPoolExecutor`, denga demikian maka task akan dimasukan ke queue(antrian eksekusi `Runnable`) setelah itu `Runnable` atau task akan di ambil oleh `Thread` dan di eksekusi.
+``` java
+@Test
+public void threadPoolCreateTest() {
+
+    int corePoolSize = 10;
+    int maxPoolSize = 100;
+ 	int keepAliveTime = 1;
+    TimeUnit aliveTime = TimeUnit.MINUTES;
+    ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
+
+	ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, aliveTime, queue);
+    Assertions.assertNotNull(threadPoolExecutor);
+
+    Runnable runnable = () -> {
+        System.out.println("Task Executed.......");
+    };
+	// meng eksekusi task/Runnable
+    threadPoolExecutor.execute(runnable);
+}
+```
+## Menghentikan ThreadPool
+Ketika kita sudah selesai menggunakan `ThreadPoiolExecutor` dan munkin tidak akan menggunakanya lagi maka lebih baik `ThreadPoolExecutor` dimatikan.  
+Ada beberapa method yang dapat digunakan untuk mematikan `ThreadPoolExecutor`, diantaranya yaitu :
+| **Method** 	  | **Description**
+|-----------------|----------------------
+| shutdown() 	  | Menghentikan ThreadPoolExecutor dan menolak semua task didalam queue ataupun task yang akan masuk queue, dan hanya mengeksekusi task yang sedang berjalan
+| shutDownNow()	  | Menghentikan ThreadPoolExecutor dan Menolak semua task, dan task yang ditolak akan dikembalikan
+| awaitTerminate()| Menghentikan ThreadPoolExecutor ketika sudah tidak ada task lagi.
+
+``` java
+@Test
+public void threadPoolExecuteor() {
+     
+    int corePoolSize = 10;
+    int maxPoolSize = 100;
+        
+    int keepAliveTime = 1;
+    TimeUnit aliveTime = TimeUnit.MINUTES;
+        
+    ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(100);
+    ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, aliveTime, queue);
+    Assertions.assertNotNull(threadPoolExecutor);
+
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    threadPoolExecutor.execute(runable());
+    // menghentikan ThreadPool
+    threadPoolExecutor.shutdown();
+}
+
+public Runnable runable() {
+    return () -> {
+        System.out.println("Task Executed by "+Thread.currentThread().getName());
+    };
+}
+```
+
+## RejecteExecutiondHandler
+Ketika Queue penuh dan semua thread sedang bekerja dan ada task(Runnable) baru yang masuk di **Queue** maka `ThreadPoolExecution` akan throw exception [`RejectedExecutionException`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/RejectedExecutionException.html). Jika kita ingin mengubah exception tersebut
+kita bisa mengimplemtasikan `RejectedExecutionException`.
+
+``` java
+public class ThreadPool {
+
+    @Test @SneakyThrows
+    public void testRejectedHandler(){
+        int corePoolSize = 10;
+        int maxPoolSize = 100;
+        int keepAlive = 1;
+        TimeUnit aliveTime = TimeUnit.MINUTES;
+        ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(10);
+      
+	    RejectedExecutionHandler rejectedHandler = new LoggerRejectedHandler();
+        ThreadPoolExecutor threadPoolExecutor1 = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAlive, aliveTime, queue, rejectedHandler);
+        for (int i = 0; i < 1000; i++) {
+            threadPoolExecutor1.execute(() -> {
+                System.out.println("Task "+Thread.currentThread().getName());
+            });
+        }
+        threadPoolExecutor1.shutdown();
+        threadPoolExecutor1.close();
+    }
+    
+	// implementasi RejectedExecutionHandler
+    public static class LoggerRejectedHandler implements RejectedExecutionHandler {
+        
+        @Override
+        public void rejectedExecution(Runnable runnable, ThreadPoolExecutor executor) {
+           System.out.println("Task "+runnable+" Is rejected....");
+        }
+    }
+}
+```
