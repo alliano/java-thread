@@ -571,4 +571,31 @@ public class ThreadTest {
 **NOTE :**
 > Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
 
-# 
+# High Level Concurrency
+Selama ini yang telah kita pelajari adalah **penggunaan Thread secara manual**.  
+Saat java versi 5 rilis, Java versi 5 memperkenalkan fitur yang bernama ***Concurrency Utilities***. Fitur ***Concurrency Utilitys*** ini memuat dukungan high level API untuk membuat *Thread* menjadi lebih mudah.
+
+Dengan demikian ketika kita membuat applikasi *Multi threaded* menjadi lebih mudah dan dapat meminimalisir terjadinya bug pada thread, misalnya seperti :
+* Race condition
+* Synchronization
+* DeadLock
+* dan sebagainya
+
+Fitur ***Concurrency Utilities*** memperkenalkan 3 package baru, yaitu :
+* `java.util.concurrent..`
+* `java.util.concurrent.atomic..`
+* `java.util.concurrent.locks..`
+
+### Why we need High Level API To Create Thread ? 🤔🤔
+Perlu diketahui, melakukan menejemen dan pembuatan thread secara manual bukanlah cara yang baik karena sangat rentan terjadi error, terutama pada :
+* Deadlock
+* Race Condition
+
+Selain itu, membaut dan melakukan menejemen *thread* secara manual sangat tidak flexibel. Oleh karna itu ketika kita ingin membuat applikasi yang multi threaded lebih baik menggunakan ***Concurrncy Utilitis***
+
+
+**NOTE :**
+> Setelah kita mengetahui tentang ***Concurrncy Utilities*** sangat direkomndasikan saat kita membuat thread menggunakan cara high level nya(Menggunakan fitur Concurrency Utilities)
+
+
+# Thread pool
