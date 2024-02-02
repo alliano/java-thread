@@ -1,6 +1,8 @@
 package com.threed;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -108,5 +110,29 @@ public class ThreadPool {
         public void rejectedExecution(Runnable runnable, ThreadPoolExecutor executor) {
            System.out.println("Task "+runnable+" Is rejected....");
         }
+    }
+
+    @Test
+    public void executorServiceSingle() {
+        ExecutorService singeleExecutor = Executors.newSingleThreadExecutor();
+        for (int i = 0; i < 1000; i++) {
+            singeleExecutor.execute(() -> {
+                System.out.println("Execute......");
+            });
+        }
+        singeleExecutor.shutdown();
+        singeleExecutor.close();
+    }
+    
+    @Test
+    public void executorServiceFix() {
+        ExecutorService singeleExecutor = Executors.newFixedThreadPool(20);
+        for (int i = 0; i < 1000; i++) {
+            singeleExecutor.execute(() -> {
+                System.out.println("Execute......"+Thread.currentThread().getName());
+            });
+        }
+        singeleExecutor.shutdown();
+        singeleExecutor.close();
     }
 }
