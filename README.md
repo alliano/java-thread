@@ -767,3 +767,57 @@ public class ThreadPool {
     }
 }
 ```
+
+# ExecutorService
+`ThreadPoolExecutor` adalah class turunan dari [`AbstractExecutorService`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/AbstractExecutorService.html) dan class `AbstractExecutorService` merupakan implementasi dari [`ExecutorService`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ExecutorService.html).  
+
+Method-method yang sering kita gunakan di `ThreadPoolExecutor`, misalnya seperti :  
+* `execute()`
+* `awaitTerminate()`
+* `shutdown()`
+* `shutdownNow()`
+* dll
+
+Sebenarnya method tersebut milik `ExecutorService`.  
+
+Jika kita inngin membuat `ThreadPool` dan `ThreadPool` tersebut digunakan untuk task-task yang tidak begitu kompleks, daripada menggunakan `ThreadPoolExecutor` lebih baik menggunakan `ExecutorService`.
+Namun jikalau kita inigin melakukan konfigurasi `ThreadPool` dan `ThreadPool` tersebut diguankan untuk task yang kompleks maka lebih baik kita menggunakan `ThreadPoolExecutor`
+  
+Kita telah mengetahui bahwa `ExecutorService` adalah super interface. Lantas gimana dong untuk membuat Obejct `ExecutorService` ??  
+Untuk membuat `ExecutorService` kita bisa menggunakan method static milik [`Executors`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Executors.html) :
+| method                        | Description
+|-------------------------------|--------------
+| newSingleThreadExecutor()     | Membuat Sigle Thread(1 thread) didalam `ThreadPool`
+| newFixedThreadPool()          | Membuat ThreadPool degan jumlah thread sesuai yang diininkan
+| 
+  
+``` java
+@Test
+public void executorServiceSingle() {
+    ExecutorService singeleExecutor = Executors.newSingleThreadExecutor();
+    for (int i = 0; i < 1000; i++) {
+        singeleExecutor.execute(() -> {
+            System.out.println("Execute......");
+        });
+    }
+    singeleExecutor.shutdown();
+    singeleExecutor.close();
+}
+
+@Test
+public void executorServiceFix() {
+    ExecutorService singeleExecutor = Executors.newFixedThreadPool(20);
+    for (int i = 0; i < 1000; i++) {
+        singeleExecutor.execute(() -> {
+            System.out.println("Execute......"+Thread.currentThread().getName());
+        });
+    }
+    singeleExecutor.shutdown();
+    singeleExecutor.close();
+}
+```
+
+**WARNING :**
+> Perlu berhati-hati saat menggunakan `ExecutorService` karena ketika menggunakan `ExecutorService` untuk membuat `ThreadPool`.
+
+> `ExecutorService` tidak membatasi jumlah task(Runnable) yang boleh ditampung di block Queue(Antria). Hal tersebut dapat menyebabkan `OutOfMemory`(kehabisan resource memory) jikalau task yang masuk di block Queue terlalu banyak.
