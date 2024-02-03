@@ -703,3 +703,75 @@ public class ThreadPool {
 
 Untuk lebih detailnya bisa kunjungi disini :  
 * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html
+
+# Callable\<V>
+Selama ini ketika kita membuat task untuk di eksekusi `Thread` kita selalu mengguakan `Runnable`. Seperti yang kita ketahui bahwa `Runnable` tidak mengembalikan return value alias void, lantas gimana dong jikalau kita membutuhkan return value ???  
+
+Jika kita ingin membuat task dan task tersebut mengembalikan return value maka kita bisa menggunakan [`Callable<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Callable.html). 
+  
+`Callable<V>` ini sebenarnya mirip dengan `Runnable`, yang membedakan keduanya adalah `Callable<V>` bisa mengembalikan return value sedangkan `Runnable` tidak dapat mengembalikan return value.
+## Future\<V>
+Ketika kita ingin mengeksekusi task berupa `Callable\<V>` maka kita bisa menggunakan method `submit()` milik `ExecutorService`. Method `submit()` akan mengembalikan return value berupa [`Feature<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html)  
+  
+`Future<V>` adalah suatu representasi data yang dikembalikan secara ***asyncronus***. kelebiahn menggunakan `Feature<V>` diantaranya yaitu : 
+* Dapat memperiksa dengan mudah apakah task terjadi interupted
+* Dapat mengetahui dengan mudah apakah task sudah selesai di eksekusi atau belum
+* Dapat mengambil return value dari `Callable<V>` dengan mudah
+* Dan masih banyak lagi.
+
+``` java
+@Test @SneakyThrows
+public void testCallable(){
+    // membuat callable dengan labda dengan Return value berupa String
+    Callable<String> callable = () -> {
+        Thread.sleep(5000L);
+        return "Hallo, Adinda";
+    };
+
+    ExecutorService singleThreadService = Executors.newSingleThreadExecutor();
+        
+    // melakukan eksekusi callable
+    Future<String> future = singleThreadService.submit(callable);
+
+    // mengecek apakah task callable sudah selesai di eksekusi
+    while (!future.isDone()) {
+        System.out.println("Wait........");
+        Thread.sleep(2000L);
+    }
+    // future.get() -> mengambil return value dari callable
+    System.out.println(future.get());
+}
+```
+
+## invokeAll
+Method `invokeAll()` adalah method milik `ExecutionService` yang dapat digunakan untuk mengeksekusi banyak task dalam 1 waktu secara ***asyncronus***.  
+Dengan demikian proses pengeksekusian banyak task dapat dilakukan dengan lebih cepat.  
+``` java
+@Test @SneakyThrows
+public void invokeAll(){
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    /**
+     * task ini akan sleesai di eksekusi selama 2 detik
+     * karena pada fixThreadPool kita membuat thread sebanyak 10
+     * Berhubung kita memiliki 20 task maka tiap 1 detik task 
+     * akan masuk di ke 10 thread dan akan di eksekusi selama 1 detik
+     * dan detik kedua task 11 - 20 akan di eksekusi thread
+     */
+    List<Future<String>> results = fixThreadPool.invokeAll(callables());
+    for (Future<String> future : results) {
+        System.out.println(future.get());
+    }
+}
+
+@SneakyThrows
+public List<Callable<String>> callables() {
+    List<Callable<String>> callables = new ArrayList<Callable<String>>();
+    for (int i = 0; i < 20; i++) {
+        callables.add(() -> {
+            Thread.sleep(1000L); // simulai proses kompleks
+            return "task with Thread" + Thread.currentThread().getName();
+        });
+    }
+    return callables;
+}
+```
