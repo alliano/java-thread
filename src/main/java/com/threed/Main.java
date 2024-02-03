@@ -3,14 +3,14 @@ package com.threed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import com.threed.helper.God;
-import com.threed.helper.MySelf;
+import com.threed.helper.Slef;
 import com.threed.helper.SomeOne;
 
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        MySelf alliano = MySelf.needSomeone();
-        Future<SomeOne> myFutureSomeone = alliano.pray.submit(() -> {
+        Slef self = Slef.needSomeone();
+        Future<SomeOne> myFutureSomeone = self.pray.submit(() -> {
                     Thread.sleep(5000L);
                     return God.giveSomeoneTheBest();
                 });
@@ -26,7 +26,7 @@ public class Main {
         System.out.println("Age : " + mySomeOne.getAge());
         System.out.println("Brith date : " + mySomeOne.getBrithDate());
 
-        alliano.pray.shutdown();
-        alliano.pray.close();
+        self.pray.shutdown();
+        self.pray.close();
     }
 }

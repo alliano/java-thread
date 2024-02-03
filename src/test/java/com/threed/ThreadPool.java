@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.threed.helper.God;
-import com.threed.helper.MySelf;
+import com.threed.helper.Slef;
 import com.threed.helper.SomeOne;
 
 import lombok.SneakyThrows;
@@ -36,7 +36,7 @@ public class ThreadPool {
 
     @Test @SneakyThrows
     public void testGetMyFurureSomeone(){
-        MySelf mySelf = MySelf.needSomeone();
+        Slef mySelf = Slef.needSomeone();
         Future<SomeOne> myFutureSomeone = mySelf.pray.submit(() -> {
                     Thread.sleep(5000L);
                     return God.giveSomeoneTheBest();
