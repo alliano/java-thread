@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -106,4 +108,45 @@ public class ThreadPool {
         return callables;
     }
 
+    @Test @SneakyThrows
+    public void testCompletableFuture() {
+        Future<String> future = completableFuture();
+        String message = future.get();
+        System.out.println(message);
+        Assertions.assertEquals("Hallo, Adinda", message);
+    }
+    
+    public CompletableFuture<String> completableFuture() {
+        ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+        CompletableFuture<String> future = new CompletableFuture<String>();
+        fixThreadPool.execute(() -> {
+            try{
+                Thread.sleep(1000L);
+                future.complete("Hallo, Adinda");
+            }catch (InterruptedException e) {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    @Test
+    public void completionStageTest() throws InterruptedException, ExecutionException {
+        ExecutorService fixThreadPool = Executors.newSingleThreadExecutor();
+        CompletableFuture<String> completableFuture = new CompletableFuture<String>();
+        fixThreadPool.execute(() -> {
+            try {
+                Thread.sleep(1000L);
+                completableFuture.complete("Hallo Adinda");    
+            } catch (InterruptedException e) {
+                completableFuture.completeExceptionally(e);
+            }
+        });
+        // melakukan assyncronus computation menggunakan method thenApplay()
+        CompletableFuture<String[]> future = completableFuture.thenApply(data -> data.toUpperCase()).thenApply(data -> data.split(" "));
+        String[] message = future.get();
+        Assertions.assertEquals(2, message.length);
+        Assertions.assertArrayEquals(new String[]{ "HALLO", "ADINDA" }, message);
+        System.out.println(message[0] + " "+ message[1]);
+    }
 }

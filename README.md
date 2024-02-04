@@ -1,6 +1,9 @@
 # Requirement
 * Java dasar
-* Java oop
+* Java OOP(Object Oriented Programming)
+* Java Standar Classes
+* Java Unit Test(JUnit)
+* Java IO Stream
 
 # Concurency 
  Concurrency adalah proses eksekusi program secara satu per satu, jadi dalam pemrosesan program nya tidak dapat melakukan multiple eksekusi atau dalam 1 waktu mengeksekusi lebih dari 1 program.  
@@ -775,3 +778,60 @@ public List<Callable<String>> callables() {
     return callables;
 }
 ```
+# CompletableFuture\<V>
+Terkadang kita medapatkan kasus yang mana kita harus membuat `Future<V>` secara manual. Untungnya pada java versi moderen telah supprot untuk melakukan hal tersebut.  
+Untuk membuat `Future<V>` secara manual kita bisa menggunakan class impementasi dari `Future<V>` yaitu [`CompletableFuture`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/class-use/CompletableFuture.html).  
+  
+Dengan menggunakan `CompletableFuture` kita bisa membaut `Future<V>` secara manual. Ketika kita menggunakan `CompletableFuture` ada 2 method yang sangat penting, yaitu :  
+| Method					| Description
+|---------------------------|-------------------
+| `complete()`				| Digunakan untuk memberikan value pada `Future<V>`
+| `completeExceptionally()`	| Digunakan untuk memberikan value pada `Future<V>` ketiak gagal
+
+``` java
+@Test @SneakyThrows
+public void testCompletableFuture() {
+    Future<String> future = completableFuture();
+    String message = future.get();
+    Assertions.assertEquals("Hallo, Adinda", message);
+}
+    
+public Future<String> completableFuture() {
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    CompletableFuture<String> future = new CompletableFuture<String>();
+    fixThreadPool.execute(() -> {
+        try{
+            Thread.sleep(1000L);
+            future.complete("Hallo, Adinda");
+        }catch (InterruptedException e) {
+            future.completeExceptionally(e);
+        }
+    });
+    return future;
+}
+```
+
+Selain implementasi dari `Future<V>` ,`CompletableFuture` juga merupakan implementasi dari [`CompletionStage`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletionStage.html). `CompletionStage` ini memungkinkan kita melakukan ***asyncronus*** ***computation*** tampa harus menunggu data dari future nya ada.
+``` java
+@Test
+public void completionStageTest() throws InterruptedException, ExecutionException {
+    ExecutorService fixThreadPool = Executors.newSingleThreadExecutor();
+    CompletableFuture<String> completableFuture = new CompletableFuture<String>();
+    fixThreadPool.execute(() -> {
+        try {
+            Thread.sleep(1000L);
+            completableFuture.complete("Hallo Adinda");    
+        } catch (InterruptedException e) {
+            completableFuture.completeExceptionally(e);
+        }
+    });
+    // melakukan assyncronus computation menggunakan method thenApplay()
+    CompletableFuture<String[]> future = completableFuture.thenApply(data -> data.toUpperCase()).thenApply(data -> data.split(" "));
+    String[] message = future.get();
+    Assertions.assertEquals(2, message.length);
+    Assertions.assertArrayEquals(new String[]{ "HALLO", "ADINDA" }, message);
+    System.out.println(message[0] + " "+ message[1]);
+}
+```
+**NOTE :**
+> ***Asyncronus Computation*** ini merujuk pada proses menipulasi data sebelum data tersebut ada
