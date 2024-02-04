@@ -2,6 +2,7 @@ package com.threed;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 
@@ -141,5 +142,12 @@ public class ThreadTest {
         timer.schedule(timerTask, 1000L, 2000L);
 
         Thread.sleep(5000L);
+    }
+
+    @Test
+    public void completableFuture() {
+        CompletableFuture<String> completableFuture = new CompletableFuture<String>();
+
+        
     }
 }
