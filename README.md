@@ -13,8 +13,8 @@
 
 # Parall
  Paraallel adalah proses eksekusi banyak program dalam 1 waktu.  
- ini kebalikanya dari Concurrency, misal kita gambarkan dalam kehidupan nyata adalah, ketika kita main mobilejen dan maki-maki musuh kita.....ya kali pas main ML/mobile legend nga maki-maki ..nga enak jirr...kurang greged minimal harus keluarin kata-kata "Ahh...anjig goblog..., Ahh Pantek, anjig, Dalampuki eeeee..." dan maka dari itu saya nobadkan gem ML/mobilegend jangan di mainkan saat bulan puasa nanti ya gaes heheh.  
-   
+ ini kebalikanya dari Concurrency, misal kita gambarkan dalam kehidupan nyata *"Ketika kita masak sambil telfon adinda"*.  
+ 
  Pada intinya Palarel programming adalah proses eksekusi beberapa program dalam 1 waktu.
 
 # Thread
@@ -530,6 +530,7 @@ Method `wait()` dan `notify()` berada pada package `java.lang.Object;` artinya s
 ``` java
 public class ThreadTest {
 
+	// shared variable
     private String name = null;
 
     private Object lock = new Object();
@@ -569,6 +570,60 @@ public class ThreadTest {
 }
 ```
 **NOTE :**
+> Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread1 akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
+
+# Timer
+Terkadang kita memiliki kasus dimana kita ingin mengeksekusi suatu baris program tertentu(***delay job***) atau baris program tersebut di eksekusi secara berulang kali(***repeted job***) sesuai dengan waktu yang kita inginkan secara *asyncronus*.  
+  
+Untuk mengatasi masalah tersebut kita bisa menggunakan [`Timer`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Timer.html). Denga menggunakan `Timer` kita bisa membuat baris programn yang dapat di eksekusi di waktu yang akan datang secara asyncrous, baik program tersebut di eksekusi hanya sekali ataupun berkali-kali.
+
+``` java
+ @Test @SneakyThrows
+public void delayJob(){
+   TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println("Job one executed......");
+        }
+    };
+
+    Timer timer = new Timer();
+    /**
+     * timer task akan dieksekusi
+     * setelah 5 detik
+     */
+    timer.schedule(timerTask, 5000L);
+
+    Thread.sleep(6000L);
+}
+
+@Test @SneakyThrows
+public void repetedJob(){
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println("Job repeted executed.....");
+        }
+    };
+
+    Timer timer = new Timer();
+    /**
+     * timerTask akan dieksekusi 1 detik sekali
+     * dan diulangi eksekusi tersebut setelah 2 detik
+     * 
+     * simpelnya eksekusi setelh 1 detik dan istirahat selama 2 detik
+     * dan proses tersebut berulang-ulang kali
+     */
+    timer.schedule(timerTask, 1000L, 2000L);
+
+    Thread.sleep(5000L);
+}
+```
+**NOTE :**
+> Penggunaan `Time` dan `TimerTask` biasanya digunakan untuk membuat job yang dikesekusi di background
+
+
+
 > Pada contoh diatas kita menjadikan property `lock` sebagai object `locking` di `synchronized`, pada runnable1 property `lock` memanggil method `wait()`, maka hal ini memungkinkan proses locking pada `synchronized` akan di skipp(di `unlock`) sehingga thread tersebut akan menunggu thread lain untuk memangil `notify()` untuk melanjutkan eksekusi kode.
 
 # High Level Concurrency
@@ -662,6 +717,7 @@ public class ThreadPool {
 Untuk lebih detailnya bisa kunjungi disini :  
 * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html
 
+<<<<<<< HEAD
 ## Mengeksekusi Runnable
 Setelah kita mengetahui cara membuat `ThreadPoolExecutor` mungkin kita bertanya-tanya bagaimana cara mengeksekusi task atau object `Runnable`.  
 
@@ -821,3 +877,76 @@ public void executorServiceFix() {
 > Perlu berhati-hati saat menggunakan `ExecutorService` karena ketika menggunakan `ExecutorService` untuk membuat `ThreadPool`.
 
 > `ExecutorService` tidak membatasi jumlah task(Runnable) yang boleh ditampung di block Queue(Antria). Hal tersebut dapat menyebabkan `OutOfMemory`(kehabisan resource memory) jikalau task yang masuk di block Queue terlalu banyak.
+=======
+# Callable\<V>
+Selama ini ketika kita membuat task untuk di eksekusi `Thread` kita selalu mengguakan `Runnable`. Seperti yang kita ketahui bahwa `Runnable` tidak mengembalikan return value alias void, lantas gimana dong jikalau kita membutuhkan return value ???  
+
+Jika kita ingin membuat task dan task tersebut mengembalikan return value maka kita bisa menggunakan [`Callable<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Callable.html). 
+  
+`Callable<V>` ini sebenarnya mirip dengan `Runnable`, yang membedakan keduanya adalah `Callable<V>` bisa mengembalikan return value sedangkan `Runnable` tidak dapat mengembalikan return value.
+## Future\<V>
+Ketika kita ingin mengeksekusi task berupa `Callable\<V>` maka kita bisa menggunakan method `submit()` milik `ExecutorService`. Method `submit()` akan mengembalikan return value berupa [`Feature<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html)  
+  
+`Future<V>` adalah suatu representasi data yang dikembalikan secara ***asyncronus***. kelebiahn menggunakan `Feature<V>` diantaranya yaitu : 
+* Dapat memperiksa dengan mudah apakah task terjadi interupted
+* Dapat mengetahui dengan mudah apakah task sudah selesai di eksekusi atau belum
+* Dapat mengambil return value dari `Callable<V>` dengan mudah
+* Dan masih banyak lagi.
+
+``` java
+@Test @SneakyThrows
+public void testCallable(){
+    // membuat callable dengan labda dengan Return value berupa String
+    Callable<String> callable = () -> {
+        Thread.sleep(5000L);
+        return "Hallo, Adinda";
+    };
+
+    ExecutorService singleThreadService = Executors.newSingleThreadExecutor();
+        
+    // melakukan eksekusi callable
+    Future<String> future = singleThreadService.submit(callable);
+
+    // mengecek apakah task callable sudah selesai di eksekusi
+    while (!future.isDone()) {
+        System.out.println("Wait........");
+        Thread.sleep(2000L);
+    }
+    // future.get() -> mengambil return value dari callable
+    System.out.println(future.get());
+}
+```
+
+## invokeAll
+Method `invokeAll()` adalah method milik `ExecutionService` yang dapat digunakan untuk mengeksekusi banyak task dalam 1 waktu secara ***asyncronus***.  
+Dengan demikian proses pengeksekusian banyak task dapat dilakukan dengan lebih cepat.  
+``` java
+@Test @SneakyThrows
+public void invokeAll(){
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    /**
+     * task ini akan sleesai di eksekusi selama 2 detik
+     * karena pada fixThreadPool kita membuat thread sebanyak 10
+     * Berhubung kita memiliki 20 task maka tiap 1 detik task 
+     * akan masuk di ke 10 thread dan akan di eksekusi selama 1 detik
+     * dan detik kedua task 11 - 20 akan di eksekusi thread
+     */
+    List<Future<String>> results = fixThreadPool.invokeAll(callables());
+    for (Future<String> future : results) {
+        System.out.println(future.get());
+    }
+}
+
+@SneakyThrows
+public List<Callable<String>> callables() {
+    List<Callable<String>> callables = new ArrayList<Callable<String>>();
+    for (int i = 0; i < 20; i++) {
+        callables.add(() -> {
+            Thread.sleep(1000L); // simulai proses kompleks
+            return "task with Thread" + Thread.currentThread().getName();
+        });
+    }
+    return callables;
+}
+```
+>>>>>>> experimental
