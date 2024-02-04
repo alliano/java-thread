@@ -13,7 +13,8 @@
 
 # Parall
  Paraallel adalah proses eksekusi banyak program dalam 1 waktu.  
- ini kebalikanya dari Concurrency, misal kita gambarkan dalam kehidupan nyata *"Ketika kita masak sambil telfon adinda"*.
+ ini kebalikanya dari Concurrency, misal kita gambarkan dalam kehidupan nyata *"Ketika kita masak sambil telfon adinda"*.  
+ 
  Pada intinya Palarel programming adalah proses eksekusi beberapa program dalam 1 waktu.
 
 # Thread
