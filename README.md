@@ -1,6 +1,9 @@
 # Requirement
 * Java dasar
-* Java oop
+* Java OOP(Object Oriented Programming)
+* Java Standar Classes
+* Java Unit Test(JUnit)
+* Java IO Stream
 
 # Concurency 
  Concurrency adalah proses eksekusi program secara satu per satu, jadi dalam pemrosesan program nya tidak dapat melakukan multiple eksekusi atau dalam 1 waktu mengeksekusi lebih dari 1 program.  
@@ -949,4 +952,135 @@ public List<Callable<String>> callables() {
     return callables;
 }
 ```
->>>>>>> experimental
+# CompletableFuture\<V>
+Terkadang kita medapatkan kasus yang mana kita harus membuat `Future<V>` secara manual. Untungnya pada java versi moderen telah supprot untuk melakukan hal tersebut.  
+Untuk membuat `Future<V>` secara manual kita bisa menggunakan class impementasi dari `Future<V>` yaitu [`CompletableFuture`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/class-use/CompletableFuture.html).  
+  
+Dengan menggunakan `CompletableFuture` kita bisa membaut `Future<V>` secara manual. Ketika kita menggunakan `CompletableFuture` ada 2 method yang sangat penting, yaitu :  
+| Method					| Description
+|---------------------------|-------------------
+| `complete()`				| Digunakan untuk memberikan value pada `Future<V>`
+| `completeExceptionally()`	| Digunakan untuk memberikan value pada `Future<V>` ketiak gagal
+
+``` java
+@Test @SneakyThrows
+public void testCompletableFuture() {
+    Future<String> future = completableFuture();
+    String message = future.get();
+    Assertions.assertEquals("Hallo, Adinda", message);
+}
+    
+public Future<String> completableFuture() {
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    CompletableFuture<String> future = new CompletableFuture<String>();
+    fixThreadPool.execute(() -> {
+        try{
+            Thread.sleep(1000L);
+            future.complete("Hallo, Adinda");
+        }catch (InterruptedException e) {
+            future.completeExceptionally(e);
+        }
+    });
+    return future;
+}
+```
+
+Selain implementasi dari `Future<V>` ,`CompletableFuture` juga merupakan implementasi dari [`CompletionStage`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletionStage.html). `CompletionStage` ini memungkinkan kita melakukan ***asyncronus*** ***computation*** tampa harus menunggu data dari future nya ada.
+``` java
+@Test
+public void completionStageTest() throws InterruptedException, ExecutionException {
+    ExecutorService fixThreadPool = Executors.newSingleThreadExecutor();
+    CompletableFuture<String> completableFuture = new CompletableFuture<String>();
+    fixThreadPool.execute(() -> {
+        try {
+            Thread.sleep(1000L);
+            completableFuture.complete("Hallo Adinda");    
+        } catch (InterruptedException e) {
+            completableFuture.completeExceptionally(e);
+        }
+    });
+    // melakukan assyncronus computation menggunakan method thenApplay()
+    CompletableFuture<String[]> future = completableFuture.thenApply(data -> data.toUpperCase()).thenApply(data -> data.split(" "));
+    String[] message = future.get();
+    Assertions.assertEquals(2, message.length);
+    Assertions.assertArrayEquals(new String[]{ "HALLO", "ADINDA" }, message);
+    System.out.println(message[0] + " "+ message[1]);
+}
+```
+**NOTE :**
+> ***Asyncronus Computation*** ini merujuk pada proses menipulasi data sebelum data tersebut ada
+
+# CompletionService
+Terkadang kita mendapatkan kasus dimana kita harus memisahkan porses ***asyncronus*** task dengan proses yang menerima hasil dari proses ***asynchronus***.  
+![completionService](./src/main/resources/images/completionService.png)  
+Misalnya proses asyncronus dilakukan oleh threadPool-1 dan threadPool-2 menerima hasil dari proses asynchronus dari threadPool 1.  
+
+Hal tersebut bisa kita lakukan dengan menggunakan [`CompletionServuice<V`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletionService.html), Namun perlu diketahui bahwa `CompletionService<V>` adalah sebuah interface maka untuk memggunakanya kita membutuhkan implementasinya.  
+  
+Kita tidak perlu mengimplementasikan secara manual jikalau ingin menggunakan `CompletionService<V` karena kita bisa menggunakan implementasi yang sudah disediakan yaitu [`ExecutorCompletionService<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ExecutorCompletionService.html).  
+  
+``` java
+@Test @SneakyThrows
+public void testCompletionService() {
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    CompletionService<String> completionService = new ExecutorCompletionService<String>(fixThreadPool);
+
+    // submit task
+    // disini proses eksekusi task asyncronus
+    Executors.newSingleThreadExecutor().execute(() -> {
+        for (int i = 0; i < 500; i++) {
+            final int index = i;
+            // melakukan submit task
+            completionService.submit(() -> {
+                Thread.sleep(1000L);
+                return "Task-"+index+" With-"+Thread.currentThread().getName();
+            });
+        }
+    });
+
+    // pool task
+    // disini proses mengambil value atau hasil output
+    // dari poroses task asyncronus yang dikerjakan diatas
+    Executors.newSingleThreadExecutor().execute(() -> {
+        while (true) {
+            try {
+                // mengambil hasil task
+                Future<String> future = completionService.poll(5, TimeUnit.SECONDS);
+                if(future == null) break;
+                else
+                System.out.println(future.get()+" With-"+Thread.currentThread().getName());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+    fixThreadPool.awaitTermination(1, TimeUnit.DAYS);
+}
+```
+**NOTE :**
+> `ExecutorCompletionService` dapat kita gunakan sebagai cara komunikasi atar thread.
+
+# ScheduleExecutorService
+Jika kita menggunakan Java thread secara manual, ketika kita ingin melakukan scheduled atau penjadwalan, delay job, repeted job maka kita akan menggunakan `TimerTask` dan `Timer`.  
+  
+Namun ketika kita menggunakan ThreadPool terdapat cara yang lebih mudah dan lebih rekomended daripada menggunakan `TimerTask` dan `Timer`, yaitu menggunakan [`ScheduledExecutorService`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ScheduledExecutorService.html)
+
+ `ScheduledExecutorService` adalah sebuah class yang bisa kita gunakan untuk melakuan penjadwalan task secara ***asynchronus***.   
+   
+Untuk mmebuat `ScheduledExecutorService` kita bisa menggunakan class implementasi `ScheduledThreadPoolExecutor` atau kita bisa menggunakan `Executors`
+``` java
+@Test @SneakyThrows
+public void testScheduledExecutorServuice() {
+    // Membuat ScheduledExecutorService menggunakan Executors
+    ScheduledExecutorService scheduleThreadPool = Executors.newScheduledThreadPool(10);
+    /**
+     * membuat delay job yang akan di eksekusi setelah 5 detik program berjalan
+     * */
+    ScheduledFuture<String> schedule = scheduleThreadPool.schedule(() -> "Hello Adidnda, tahnks for everything u give me!", 5, TimeUnit.SECONDS);
+    long delay = schedule.getDelay(TimeUnit.SECONDS);
+    String message = schedule.get();
+    System.out.println(message);
+    System.out.println("The program will execute in "+delay+" second again");
+    scheduleThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+}
+```

@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -216,4 +222,96 @@ public class ThreadPool {
         return callables;
     }
 
+    @Test @SneakyThrows
+    public void testCompletableFuture() {
+        Future<String> future = completableFuture();
+        String message = future.get();
+        System.out.println(message);
+        Assertions.assertEquals("Hallo, Adinda", message);
+    }
+    
+    public CompletableFuture<String> completableFuture() {
+        ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+        CompletableFuture<String> future = new CompletableFuture<String>();
+        fixThreadPool.execute(() -> {
+            try{
+                Thread.sleep(1000L);
+                future.complete("Hallo, Adinda");
+            }catch (InterruptedException e) {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    @Test
+    public void completionStageTest() throws InterruptedException, ExecutionException {
+        ExecutorService fixThreadPool = Executors.newSingleThreadExecutor();
+        CompletableFuture<String> completableFuture = new CompletableFuture<String>();
+        fixThreadPool.execute(() -> {
+            try {
+                Thread.sleep(1000L);
+                completableFuture.complete("Hallo Adinda");    
+            } catch (InterruptedException e) {
+                completableFuture.completeExceptionally(e);
+            }
+        });
+        // melakukan assyncronus computation menggunakan method thenApplay()
+        CompletableFuture<String[]> future = completableFuture.thenApply(data -> data.toUpperCase()).thenApply(data -> data.split(" "));
+        String[] message = future.get();
+        Assertions.assertEquals(2, message.length);
+        Assertions.assertArrayEquals(new String[]{ "HALLO", "ADINDA" }, message);
+        System.out.println(message[0] + " "+ message[1]);
+    }
+
+    @Test @SneakyThrows
+    public void testCompletionService() {
+        ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+        CompletionService<String> completionService = new ExecutorCompletionService<String>(fixThreadPool);
+
+        // submit task
+        Executors.newSingleThreadExecutor().execute(() -> {
+            for (int i = 0; i < 500; i++) {
+                final int index = i;
+                completionService.submit(() -> {
+                    Thread.sleep(1000L);
+                    return "Task-"+index+" With-"+Thread.currentThread().getName();
+                });
+            }
+        });
+
+        // pool task
+        Executors.newSingleThreadExecutor().execute(() -> {
+            while (true) {
+                try {
+                    Future<String> future = completionService.poll(5, TimeUnit.SECONDS);
+                    if(future == null) break;
+                    else
+                    System.out.println(future.get()+" With-"+Thread.currentThread().getName());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        fixThreadPool.awaitTermination(1, TimeUnit.DAYS);
+    }
+
+    @Test @SneakyThrows
+    public void scheduledExecutorServuice() {
+        ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(10);
+        scheduledThreadPool.scheduleWithFixedDelay(() -> System.out.println("Hallo Adidnda, Thanks for everything u give me"), 3, 5, TimeUnit.SECONDS);
+        scheduledThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+        scheduledThreadPool.awaitTermination(10, TimeUnit.SECONDS);
+    }
+
+    @Test @SneakyThrows
+    public void testScheduledExecutorServuice() {
+        ScheduledExecutorService scheduleThreadPool = Executors.newScheduledThreadPool(10);
+        ScheduledFuture<String> schedule = scheduleThreadPool.schedule(() -> "Hello Adidnda, tahnks for everything u give me!", 5, TimeUnit.SECONDS);
+        long delay = schedule.getDelay(TimeUnit.SECONDS);
+        String message = schedule.get();
+        System.out.println(message);
+        System.out.println("The program will execute in "+delay+" second again");
+        scheduleThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+    }
 }
