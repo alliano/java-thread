@@ -835,3 +835,78 @@ public void completionStageTest() throws InterruptedException, ExecutionExceptio
 ```
 **NOTE :**
 > ***Asyncronus Computation*** ini merujuk pada proses menipulasi data sebelum data tersebut ada
+
+# CompletionService
+Terkadang kita mendapatkan kasus dimana kita harus memisahkan porses ***asyncronus*** task dengan proses yang menerima hasil dari proses ***asynchronus***.  
+![completionService](./src/main/resources/images/completionService.png)  
+Misalnya proses asyncronus dilakukan oleh threadPool-1 dan threadPool-2 menerima hasil dari proses asynchronus dari threadPool 1.  
+
+Hal tersebut bisa kita lakukan dengan menggunakan [`CompletionServuice<V`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CompletionService.html), Namun perlu diketahui bahwa `CompletionService<V>` adalah sebuah interface maka untuk memggunakanya kita membutuhkan implementasinya.  
+  
+Kita tidak perlu mengimplementasikan secara manual jikalau ingin menggunakan `CompletionService<V` karena kita bisa menggunakan implementasi yang sudah disediakan yaitu [`ExecutorCompletionService<V>`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ExecutorCompletionService.html).  
+  
+``` java
+@Test @SneakyThrows
+public void testCompletionService() {
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    CompletionService<String> completionService = new ExecutorCompletionService<String>(fixThreadPool);
+
+    // submit task
+    // disini proses eksekusi task asyncronus
+    Executors.newSingleThreadExecutor().execute(() -> {
+        for (int i = 0; i < 500; i++) {
+            final int index = i;
+            // melakukan submit task
+            completionService.submit(() -> {
+                Thread.sleep(1000L);
+                return "Task-"+index+" With-"+Thread.currentThread().getName();
+            });
+        }
+    });
+
+    // pool task
+    // disini proses mengambil value atau hasil output
+    // dari poroses task asyncronus yang dikerjakan diatas
+    Executors.newSingleThreadExecutor().execute(() -> {
+        while (true) {
+            try {
+                // mengambil hasil task
+                Future<String> future = completionService.poll(5, TimeUnit.SECONDS);
+                if(future == null) break;
+                else
+                System.out.println(future.get()+" With-"+Thread.currentThread().getName());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+    fixThreadPool.awaitTermination(1, TimeUnit.DAYS);
+}
+```
+**NOTE :**
+> `ExecutorCompletionService` dapat kita gunakan sebagai cara komunikasi atar thread.
+
+# ScheduleExecutorService
+Jika kita menggunakan Java thread secara manual, ketika kita ingin melakukan scheduled atau penjadwalan, delay job, repeted job maka kita akan menggunakan `TimerTask` dan `Timer`.  
+  
+Namun ketika kita menggunakan ThreadPool terdapat cara yang lebih mudah dan lebih rekomended daripada menggunakan `TimerTask` dan `Timer`, yaitu menggunakan [`ScheduledExecutorService`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ScheduledExecutorService.html)
+
+ `ScheduledExecutorService` adalah sebuah class yang bisa kita gunakan untuk melakuan penjadwalan task secara ***asynchronus***.   
+   
+Untuk mmebuat `ScheduledExecutorService` kita bisa menggunakan class implementasi `ScheduledThreadPoolExecutor` atau kita bisa menggunakan `Executors`
+``` java
+@Test @SneakyThrows
+public void testScheduledExecutorServuice() {
+    // Membuat ScheduledExecutorService menggunakan Executors
+    ScheduledExecutorService scheduleThreadPool = Executors.newScheduledThreadPool(10);
+    /**
+     * membuat delay job yang akan di eksekusi setelah 5 detik program berjalan
+     * */
+    ScheduledFuture<String> schedule = scheduleThreadPool.schedule(() -> "Hello Adidnda, tahnks for everything u give me!", 5, TimeUnit.SECONDS);
+    long delay = schedule.getDelay(TimeUnit.SECONDS);
+    String message = schedule.get();
+    System.out.println(message);
+    System.out.println("The program will execute in "+delay+" second again");
+    scheduleThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+}
+```
