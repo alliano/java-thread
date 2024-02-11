@@ -1084,3 +1084,212 @@ public void testScheduledExecutorServuice() {
     scheduleThreadPool.awaitTermination(5, TimeUnit.SECONDS);
 }
 ```
+# Atomic
+Pada package `concurrent` di bahasa pemograman java terdapat sub package [`atomic`](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/atomic/package-summary.html) yang berisikan class-class yang mendukung lock-free dan thread-save programming pada single variable.  
+Tiap-tiap class yang berada pada package `atomic` melakukan ***synchronization*** debgaan cara mengelola data yang dimasukan atau di update menggunakan method yang sudah disediakan, Dengan demikian ***Race-Condition*** dapat ditangani secara otomtis.  
+  
+Semua class yang berada pada package `atomic` mengimplementasikan [***Compare-and-Swap***](https://en.wikipedia.org/wiki/Compare-and-swap) untuk melakukan ***Synchronization*** nya, maka dari itu ketika kita menggunakan class yang berada pada `atomic` package kita tidak membutuhkan ***synchronized*** secara manual.
+
+``` java
+@Setter @Getter
+public class AtomicCounter {
+    
+    // menggunakan salah satu class di atomic untuk menampung angka
+    private AtomicLong counter = new AtomicLong(0);
+
+    public void increment() {
+        // melakukan increment pada counter
+        counter.incrementAndGet();
+    }
+
+    public Long getCounter() {
+        return counter.get();
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void testAtomc(){
+    AtomicCounter atomicCounter = new AtomicCounter();
+    Runnable runnable = () -> {
+        for (int i = 0; i < 1000; i++) {
+            atomicCounter.increment();  
+        }
+    };
+
+    Thread thread1 = new Thread(runnable);
+    Thread thread2 = new Thread(runnable);
+    Thread thread3 = new Thread(runnable);
+    Thread thread4 = new Thread(runnable);
+
+    thread1.start();
+    thread2.start();
+    thread3.start();
+    thread4.start();
+
+    thread1.join();
+    thread2.join();
+    thread3.join();
+    thread4.join();
+
+    Long counter = atomicCounter.getCounter();
+    System.out.println(counter);
+}
+```
+# Lock
+Sebelumnya ketika kita ingin malukukan locking kita akan menggunakan ***synchronized***, namun untuk sekarang java telah menyediakan high level concurrency package untuk melakukan locking atau untuk melakukan waiting thread.  
+  
+package lock ini bisa digunakan sebagai alternative `wait()`, `notyfy()`, atau `notifyAll()`, daripada kita menggunakan cara low level menggunakan `synchronized` dan `wait()`, `notyfy()`, `notifyAll()` lebih baik kita menggunakan fitur yang disediakan pada package [`lock`](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/package-summary.html).  
+  
+## Lock Interface
+Lock Interface adalah alternative dari ***synchronize*** unutk melakukan locking.  
+Seperti yang kita ketahui `Lock` adalah sebuah interface dan untuk mneggunakanya kita membutuhkan implementasinya. Salahsatu implementasi dari `Lock` adalaha `ReentrantLock`.  
+
+`ReentrantLock` adalah sahsatu implementasi `Lock` yang bisa kita gunakan untuk melakukan locking.
+untuk melakukan loking kita bisa menggunakan method `lock()` dan unutuk melakukan unlock kita bisa menggunakan method `unlock()` milik interface `Lock`.
+``` java
+@Getter
+public class CounterLock {
+   
+    private Long counter = 0L;
+
+    private final Lock lock = new ReentrantLock();
+
+    public void increment() {
+        try {
+            lock.lock();
+            counter++;
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void testLock() {
+    CounterLock counterLock = new CounterLock();
+    Runnable runnable = () -> {
+        for (int i = 0; i < 1000; i++) {
+            counterLock.increment();
+        }
+    };
+
+    Thread thread1 = new Thread(runnable, "thread-1");
+    Thread thread2 = new Thread(runnable, "thread-2");
+    Thread thread3 = new Thread(runnable, "thread-3");
+    Thread thread4 = new Thread(runnable, "thread-4");
+    Thread thread5 = new Thread(runnable, "thread-5");
+    Thread thread6 = new Thread(runnable, "thread-6");
+    Thread thread7 = new Thread(runnable, "thread-7");
+    Thread thread8 = new Thread(runnable, "thread-8");
+    Thread thread9 = new Thread(runnable, "thread-9");
+    Thread thread10 = new Thread(runnable, "thread-10");
+    Thread thread11 = new Thread(runnable, "thread-11");
+    Thread thread12 = new Thread(runnable, "thread-12");
+
+    thread1.start();
+    thread2.start();
+    thread3.start();
+    thread4.start();
+    thread5.start();
+    thread6.start();
+    thread7.start();
+    thread8.start();
+    thread9.start();
+    thread10.start();
+    thread11.start();
+    thread12.start();
+
+    thread1.join();
+    thread2.join();
+    thread3.join();
+    thread4.join();
+    thread5.join();
+    thread6.join();
+    thread7.join();
+    thread8.join();
+    thread9.join();
+    thread10.join();
+    thread11.join();
+    thread12.join();
+    
+    System.out.println(counterLock.getCounter());
+}
+```
+
+## Read Write Lock
+Ketika kita menggunakan `Lock`, maka proses locking nya akan terjadi pada :
+* **Write**
+* **Read**
+
+Terkadang kita ingin proses locking dilakukan di salah satu proses aja, misalnya pada proses **Write** atau **Read**. 
+Untuk melakukan hal tersebut kita bisa menggunakan [`ReadWeriteLock`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/ReadWriteLock.html), namun `ReadWriteLock` adalah sebuah interface untuk menggunakanya kita bisa menggunakan class implementasi nya yaitu [`ReentrantReadWriteLock`](https://docs.oracle.com/en/java/javase/21/docs//api/java.base/java/util/concurrent/locks/ReentrantReadWriteLock.ReadLock.html)
+``` java
+public class CounterReadWriteLock {
+
+    private Long counter = 0L;
+
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+    public void increment() {
+        try {
+            // melakukan locking di proses write
+            readWriteLock.writeLock().lock();
+            counter++;
+        }
+        finally {
+            // melakukan unlock
+            readWriteLock.writeLock().unlock();
+        }
+    }
+
+    public Long getCounter() {
+        try {
+            // melakuakn lock di proses read
+            readWriteLock.readLock().lock();
+            return counter;
+        }
+        finally {
+            // melakukan unlock
+            readWriteLock.readLock().unlock();
+        }
+    }
+}
+```
+
+``` java
+@Test @SneakyThrows
+public void readWriteLock() {
+    CounterReadWriteLock counterReadWriteLock = new CounterReadWriteLock();
+    Runnable runnable = () -> {
+        for (int i = 0; i < 1000; i++) {
+            counterReadWriteLock.increment();
+        }
+    };
+
+    Thread thread1 = new Thread(runnable, "thread-1");
+    Thread thread2 = new Thread(runnable, "thread-2");
+    Thread thread3 = new Thread(runnable, "thread-3");
+    Thread thread4 = new Thread(runnable, "thread-4");
+    Thread thread5 = new Thread(runnable, "thread-5");
+
+    thread1.start();
+    thread2.start();
+    thread3.start();
+    thread4.start();
+    thread5.start();
+
+    thread1.join();
+    thread2.join();
+    thread3.join();
+    thread4.join();
+    thread5.join();
+
+    Assertions.assertEquals(1000*5, counterReadWriteLock.getCounter());
+    System.out.println(counterReadWriteLock.getCounter());
+}
+```
