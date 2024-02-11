@@ -11,15 +11,18 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.threed.helper.AtomicCounter;
+import com.threed.helper.CounterLock;
+import com.threed.helper.CounterReadWriteLock;
 import com.threed.helper.God;
 import com.threed.helper.Slef;
 import com.threed.helper.SomeOne;
@@ -313,5 +316,127 @@ public class ThreadPool {
         System.out.println(message);
         System.out.println("The program will execute in "+delay+" second again");
         scheduleThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Test @SneakyThrows
+    public void testAtomc(){
+        AtomicCounter atomicCounter = new AtomicCounter();
+        Runnable runnable = () -> {
+            for (int i = 0; i < 1000; i++) {
+                atomicCounter.increment();  
+            }
+        };
+
+        Thread thread1 = new Thread(runnable);
+        Thread thread2 = new Thread(runnable);
+        Thread thread3 = new Thread(runnable);
+        Thread thread4 = new Thread(runnable);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+
+        Long counter = atomicCounter.getCounter();
+        System.out.println(counter);
+    }
+
+    @Test @SneakyThrows
+    public void testLock() {
+        // ExecutorService fixThreadPool = Executors.newFixedThreadPool(20);
+
+        CounterLock counterLock = new CounterLock();
+        Runnable runnable = () -> {
+            for (int i = 0; i < 1000; i++) {
+                // System.out.println(Thread.currentThread().getName());
+                counterLock.increment();
+            }
+        };
+
+
+        Thread thread1 = new Thread(runnable, "thread-1");
+        Thread thread2 = new Thread(runnable, "thread-2");
+        Thread thread3 = new Thread(runnable, "thread-3");
+        Thread thread4 = new Thread(runnable, "thread-4");
+        Thread thread5 = new Thread(runnable, "thread-5");
+        Thread thread6 = new Thread(runnable, "thread-6");
+        Thread thread7 = new Thread(runnable, "thread-7");
+        Thread thread8 = new Thread(runnable, "thread-8");
+        Thread thread9 = new Thread(runnable, "thread-9");
+        Thread thread10 = new Thread(runnable, "thread-10");
+        Thread thread11 = new Thread(runnable, "thread-11");
+        Thread thread12 = new Thread(runnable, "thread-12");
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+        thread5.start();
+        thread6.start();
+        thread7.start();
+        thread8.start();
+        thread9.start();
+        thread10.start();
+        thread11.start();
+        thread12.start();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+        thread5.join();
+        thread6.join();
+        thread7.join();
+        thread8.join();
+        thread9.join();
+        thread10.join();
+        thread11.join();
+        thread12.join();
+        
+        System.out.println(counterLock.getCounter());
+        
+        
+        // for (int i = 0; i < 8; i++) {
+        //     fixThreadPool.execute(runnable);
+        // }
+
+        // fixThreadPool.awaitTermination(4, TimeUnit.SECONDS);
+        // fixThreadPool.close();
+    }
+
+    @Test @SneakyThrows
+    public void readWriteLock() {
+        CounterReadWriteLock counterReadWriteLock = new CounterReadWriteLock();
+        Runnable runnable = () -> {
+            for (int i = 0; i < 1000; i++) {
+                counterReadWriteLock.increment();
+            }
+        };
+
+        Thread thread1 = new Thread(runnable, "thread-1");
+        Thread thread2 = new Thread(runnable, "thread-2");
+        Thread thread3 = new Thread(runnable, "thread-3");
+        Thread thread4 = new Thread(runnable, "thread-4");
+        Thread thread5 = new Thread(runnable, "thread-5");
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+        thread5.start();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+        thread5.join();
+
+        Assertions.assertEquals(1000*5, counterReadWriteLock.getCounter());
+        System.out.println(counterReadWriteLock.getCounter());
     }
 }
