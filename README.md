@@ -1293,3 +1293,64 @@ public void readWriteLock() {
     System.out.println(counterReadWriteLock.getCounter());
 }
 ```
+
+## Condition
+Pada `Lock` terdapat method `newCondition()` untuk membuat `Condition`.  
+Condition adalah alternative atau cara high level untuk melakukan monitoring method. Sebelumnya ketika kita ingin melakukan monitoring, kita akan menggunakan  :
+* `wait()`
+* `notify()`
+* `notifyAll()`
+
+Namun untuk java versi terbaru atau java versi moderen, cara tersebut tidak direkomendasikan lagi. Daripada melakukan monitoring menggunakan `wait()` dan sebagainya, lebih baik menggunakan `Condition`.  
+  
+Berikut ini method-method yang digunakan untuk melakukan monitoring method:
+| Method     | Description
+|----------- |-------------------
+| wait()     | digunakan untuk menunggu thread lain 
+| signal()   | digunakan untuk mentriger thread agar thread yang menunggu di eksekusi
+| signalAll()| digunakan untuk mentriger semua thread yang menunggu agar di eksekusi
+
+``` java
+public class ThreadPool {
+
+    private String message = "";
+
+    @Test @SneakyThrows
+    public void testCondition() {
+        Lock lock = new ReentrantLock();
+        Condition condition = lock.newCondition();
+
+        Thread thread1 = new Thread(() -> {
+            try {
+                lock.lock();
+                // menunggu thread lain memanggil method signal()
+                condition.await();
+                System.out.println(message);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                lock.lock();
+                message = "Hallo Adinda Sayang....";
+                // megirimkan sinyal kepada thread yang menunggu agar thread yang menunggu segera melakukan eksekusi kodenya
+                condition.signal();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+    }
+}
+```

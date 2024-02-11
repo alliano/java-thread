@@ -16,6 +16,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -438,5 +441,44 @@ public class ThreadPool {
 
         Assertions.assertEquals(1000*5, counterReadWriteLock.getCounter());
         System.out.println(counterReadWriteLock.getCounter());
+    }
+
+    private String message = "";
+
+    @Test @SneakyThrows
+    public void testCondition() {
+        Lock lock = new ReentrantLock();
+        Condition condition = lock.newCondition();
+
+        Thread thread1 = new Thread(() -> {
+            try {
+                lock.lock();
+                condition.await();
+                System.out.println(message);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                lock.lock();
+                Thread.sleep(2000L);
+                message = "Hallo Adinda Sayang....";
+                condition.signal();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
     }
 }
