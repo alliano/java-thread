@@ -1354,3 +1354,54 @@ public class ThreadPool {
     }
 }
 ```
+
+# Synchronizer
+Didalam pacage `java.util.concurrent` terdapat banyak sekali class-class yang dapat kita gunakan untuk melakukan ***synchronize***, berikut ini merupakan class-class nya :
+* Semaphore
+* CountDownLatch
+* CyclicBarrier
+* Phaser
+* Exchanger
+class-class tersebut merupakan inprovement dari `Lock` yang digunakan pada kasus-kasus tertentu.
+
+## Semaphore
+Semaphore merupakan class yang digunakan untuk membatasi jumlah thread yang mengakses resource dalam 1 waktu.  
+  
+Cara kerja semaphore adalah dengan menambah nilai counter pada semaphore dengan menggunakan method `acquire()` hingga counter menacapai limit yang sudah ditentukan, jika counter mencapai limit yang ditentukan maka thread yang akan mencoba mengakses resource akan di dihentikan. Agar nilai conter pada semaphore berkurang dan thread bisa mengakses resource lagi maka kita harus menguragi nilai counter dengan menggunakan metod `release()`, denga demikian nilai pada counter akan berkurang dan thred yang lain dapat mengakses resource.
+
+``` java
+@Test @SneakyThrows
+public void testSemaphore() {
+    // menginisiasi semaphore denga limit counter 5
+    // artinya hanya 5 thread yang diizinkan mengakses resource dalam 1 waktu
+    final Semaphore semaphore = new Semaphore(5);
+    ExecutorService fixThreadPool = Executors.newFixedThreadPool(10);
+    for (int i = 0; i < 100; i++) {
+        fixThreadPool.execute(() -> {
+            try {
+                /**
+                 * menambahkan nilai counter pada semaphore. jikalau nilai counter pada 
+                 * semaphore mencapai limit maka thread yang
+                 * mencobamengakses blok kode ini(blok kode didalam try{}) akan di hentikan
+                 * */
+                semaphore.acquire();
+                Thread.sleep(1000L);
+                System.out.println("i have unlimeted love for safa...");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                // menguragi nilai counter pada semaphore
+                // agar thread yang lain bisa mengakses kembali resource
+                semaphore.release();
+            }
+        });
+    }
+    fixThreadPool.awaitTermination(20, TimeUnit.SECONDS);
+
+    /**
+     * Dengan demikian pengaturan semaphore diatas
+     * maka dalam 1 waktu hanya 5 thread yang
+     * diizinkan mengaksess resource
+     * */
+}
+```
